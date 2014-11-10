@@ -1,0 +1,43 @@
+<navigation active="active" groups="groups" activeGroup="group" tables="tables" activeTable="table"></navigation>
+
+<div id="page-wrapper">
+
+	<div class="row">
+		<div class="col-lg-12">
+			<h2 class="page-header">{{title}}</h2>
+		</div>
+		<!-- /.col-lg-12 -->
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<form role="form" novalidate class="simple-form">
+				<div class="form-group">
+					<label for="accountIdInput">AWS Account ID:</label>
+					<input type="text" class="form-control" id="accountIdInput" value="{{table.account}}" ng-model="table.account" ng-readonly="readonly"/>
+				</div>
+				<div class="form-group">                        
+					<label for="regionInput">AWS region:</label>   
+
+					<input type="text" class="form-control" id="regionInput" ng-model="table.region" value="{{table.region}}" ng-readonly="readonly" />
+				</div>
+				<div class="form-group">                        
+					<label for="nameInput">DynamoDB table name:</label>   
+
+					<input type="text" class="form-control" id="nameInput" ng-model="table.name" value="{{table.name}}" ng-readonly="readonly" />
+				</div>				
+				<div class="form-group">                        
+					<label for="nameInput">AWS Access Key ID (optional if IAM role is used):</label>   
+
+					<input type="text" class="form-control" id="accessKeyInput" ng-model="table.accessKey" />
+				</div>				
+				<div class="form-group">                        
+					<label for="nameInput">AWS Secret Access Key (optional if IAM role is used:</label>   
+
+					<input type="password" class="form-control" id="secretKeyInput" ng-model="table.secretKey" />
+				</div>												
+				<button class="btn-primary pull-right" ng-click="save(table)">{{operation}}</button>                      
+			</form>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,23 @@
+<navigation active="active" groups="groups" activeGroup="group" tables="tables" activeTable="table"></navigation>
+
+<div id="page-wrapper">
+
+	<div class="row">
+		<div class="col-lg-12">
+			<h2 class="page-header">{{title}}</h2>
+		</div>
+		<!-- /.col-lg-12 -->
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<form role="form" novalidate class="simple-form">
+				<div class="form-group">                        
+					<label for="nameInput">Name of Replication Group: </label>   
+					<input type="text" class="form-control" id="nameInput" ng-model="group.name" value="{{groupName}}" />
+				</div>
+				<button class="btn-primary pull-right" ng-click="save(group)">{{operation}}</button>                      
+			</form>
+		</div>
+	</div>
+</div>

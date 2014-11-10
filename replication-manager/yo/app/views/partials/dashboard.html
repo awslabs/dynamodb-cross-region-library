@@ -1,0 +1,74 @@
+<navigation active="active" groups="groups" activeGroup="group" tables="tables" activeTable="table"></navigation>
+
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="page-header">{{title}}</h2>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 col-md-6" ng-repeat="group in groups | filter:query">
+            <div class="panel" ng-class="group.getPanelColor()">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <img class="img-responsive" ng-src="images/dynamodb_table.png"></img>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div>{{group.name}}</div>
+                            <div>{{group.status}}</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#/replicationGroups/{{group.id}}">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <a href="#/replicationGroups/add">        
+                <div class="panel panel-gray" ng-class="{transparent: !isAddTableButtonActive}" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-plus-circle fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-footer">
+                        <span class="pull-left">Click here to add</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bell fa-fw"></i> Notifications Panel
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+        </div>
+        <!-- /.col-lg-4 -->
+    </div>
+    <!-- /.row -->
+</div>
+<!-- /#page-wrapper -->

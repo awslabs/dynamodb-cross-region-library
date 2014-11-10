@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>dynamodb-cross-region-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Amazon DynamoDB Cross Region</name>
+    <version>0.1.0-SNAPSHOT</version>
+    <description>The Amazon DynamoDB Cross Region Replication Library and an example replication manager implementation.</description>
+    <url>https://aws.amazon.com/dynamodb</url>
+    <scm>
+        <url>https://github.com/awslabs/dynamodb-cross-region-library.git</url>
+    </scm>
+
+    <modules>
+        <module>library</module>
+        <module>replication-manager</module>
+    </modules>
+
+    <licenses>
+        <license>
+            <name>Amazon Software License</name>
+            <url>https://aws.amazon.com/asl</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>amazonwebservices</id>
+            <organization>Amazon Web Services</organization>
+            <organizationUrl>https://aws.amazon.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+</project> 
+

@@ -1,0 +1,196 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  
+  "Description" : "AWS CloudFormation Template for demonstrating cross region replication application.",
+  
+  "Parameters" : {
+      
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255",
+      "AllowedPattern" : "[\\x20-\\x7E]*",
+      "ConstraintDescription" : "can contain only ASCII characters."
+    },    
+    
+    "InstanceType" : {
+      "Description" : "EC2 instance type",
+      "Type" : "String",
+      "Default" : "t1.micro",
+      "AllowedValues" : [ "t1.micro","m1.small","m1.medium","m1.large","m1.xlarge","m2.xlarge","m2.2xlarge","m2.4xlarge","m3.xlarge","m3.2xlarge","c1.medium","c1.xlarge","cc1.4xlarge","cc2.8xlarge","cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+    "SSHLocation" : {
+      "Description" : " The IP address range that can be used to SSH to the EC2 instances",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }  
+  },
+  
+  "Mappings" : {
+    "AWSInstanceType2Arch" : {
+      "t1.micro"    : { "Arch" : "64" },
+      "t2.micro"    : { "Arch" : "64HVM" },
+      "t2.small"    : { "Arch" : "64HVM" },
+      "t2.medium"   : { "Arch" : "64HVM" },                  
+      "m1.small"    : { "Arch" : "64" },
+      "m1.medium"   : { "Arch" : "64" },
+      "m1.large"    : { "Arch" : "64" },
+      "m1.xlarge"   : { "Arch" : "64" },
+      "m2.xlarge"   : { "Arch" : "64" },
+      "m2.2xlarge"  : { "Arch" : "64" },
+      "m2.4xlarge"  : { "Arch" : "64" },
+      "m3.xlarge"   : { "Arch" : "64" },
+      "m3.2xlarge"  : { "Arch" : "64" },
+      "c1.medium"   : { "Arch" : "64" },
+      "c1.xlarge"   : { "Arch" : "64" },
+      "cc1.4xlarge" : { "Arch" : "64HVM" },
+      "cc2.8xlarge" : { "Arch" : "64HVM" },
+      "cg1.4xlarge" : { "Arch" : "64HVM" }
+    },
+
+    "AWSRegionArch2AMI" : {
+      "us-east-1"      : { "64" : "ami-246ed34c", "64HVM" : "ami-b66ed3de" },
+      "us-west-2"      : { "64" : "ami-55a7ea65", "64HVM" : "ami-b5a7ea85" },
+      "us-west-1"      : { "64" : "ami-9b6e64de", "64HVM" : "ami-4b6f650e" },
+      "eu-west-1"      : { "64" : "ami-9c7ad8eb", "64HVM" : "ami-6e7bd919" },
+      "eu-central-1"   : { "64" : "ami-a03503bd", "64HVM" : "ami-b43503a9" },      
+      "ap-southeast-1" : { "64" : "ami-ba5c7ae8", "64HVM" : "ami-ac5c7afe" },
+      "ap-southeast-2" : { "64" : "ami-2385b022", "64HVM" : "ami-4985b048" },
+      "ap-northeast-1" : { "64" : "ami-71f7954b", "64HVM" : "ami-63f79559" },
+      "sa-east-1"      : { "64" : "ami-9137828c", "64HVM" : "ami-8737829a" }
+    }
+  },
+    
+  "Resources" : {     
+      
+    "WebServer": {  
+      "Type": "AWS::EC2::Instance",
+      "Metadata" : {
+      },
+      "Properties": {
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "SecurityGroups" : [ {"Ref" : "WebServerSecurityGroup"} ],
+        "KeyName"        : { "Ref" : "KeyName" },
+        "IamInstanceProfile": { "Ref": "InstanceProfile" },
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -v\n",
+          "yum update -y aws-cfn-bootstrap\n",
+
+          "# Helper function\n",
+          "function error_exit\n",
+          "{\n",
+          "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '", { "Ref" : "WaitHandle" }, "'\n",
+          "  exit 1\n",
+          "}\n",
+
+          "yum install -y --enablerepo epel npm git || error_exit 'Failed to install npm and/or git' \n",
+          "wget http://dynamodb-cross-region.s3.amazonaws.com/cross-region-replication-demo.zip || error_exit 'Failed to download demo package.' \n",
+          "unzip cross-region-replication-demo.zip || error_exit 'Failed to unpack package' \n",
+          "cd cross-region-replication-demo; ./setup.sh || error_exit 'Failed to setup demo environment' \n",          
+          "./run.sh > log \n",                    
+          "sleep 15\n",
+
+          "# All is well so signal success\n",
+          "/opt/aws/bin/cfn-signal -e 0 -r \"Setup complete\" '", { "Ref" : "WaitHandle" }, "'\n"          
+        ]]}}        
+      }
+    },
+
+    "WaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+
+    "WaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "DependsOn" : "WebServer",
+      "Properties" : {
+        "Handle" : {"Ref" : "WaitHandle"},
+        "Timeout" : "300"
+      }
+    },
+    
+    "WebServerSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable HTTP access via port 80 and SSH access",
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "8081", "ToPort" : "8081", "CidrIp" : "0.0.0.0/0"},                    
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}}
+        ]
+      }      
+    },
+
+    "Role": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+            "Path": "/"
+        }
+    },
+    "RolePolicies": {
+         "Type": "AWS::IAM::Policy",
+         "Properties": {
+            "PolicyName": "CloudWatchAccess",
+            "PolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Action": "cloudwatch:*",
+                  "Resource": "*"
+               } ]
+            },
+            "Roles": [ { "Ref": "Role" } ]
+         }
+    },
+    "InstanceProfile": {
+         "Type": "AWS::IAM::InstanceProfile",
+         "Properties": {
+            "Path": "/",
+            "Roles": [ { "Ref": "Role" } ]
+         }
+    }
+  },          
+  
+  "Outputs" : {
+    "ReplicationManagementUI" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":8080/"]] },
+      "Description" : "Replication Management UI"
+    },
+    "DashboardOnMasterTable" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":10000/"]] },
+      "Description" : "Dashboard reading Master Table"
+    },
+    "DynamoDBLocalShellOnMasterTable" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":8000/shell"]] },
+      "Description" : "DynamoDB local Javascript shell for master table"
+    },
+    "DashboardOnReplicaTable" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":10001/"]] },
+      "Description" : "Dashboard reading Replica Table"
+    },
+    "DynamoDBLocalShellOnReplicaTable" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]}, ":8001/shell"]] },
+      "Description" : "DynamoDB local Javascript shell for replica table"
+    }    
+  }    
+}

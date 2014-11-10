@@ -1,0 +1,13 @@
+{
+	"us-east-1" : [
+	{ "TableName":"table1", "Region":"us-east-1", "TableStatus":"REPLICATING", "Master":true, "KinesisApplicationName":"CrossRegionReplicationApplication-us-east-1-table1"},
+	{ "TableName":"table1copy","Region":"us-east-1", "TableStatus":"STOPPED", "Master":false}
+	],
+	"eu-west-1" : [
+	{ "TableName":"table1", "Region":"eu-west-1", "TableStatus":"BOOTSTRAPPING", "Master":true, "KinesisApplicationName":"CrossRegionReplicationApplication-eu-west-1-table1"},
+	{ "TableName":"table1copy", "Region":"eu-west-1", "TableStatus":"NOT_STARTED", "Master":false}
+	],	 
+	"invalidRegion" : [
+	{ "TableName":"nonexistentTable", "Region":"invalidRegion", "TableStatus":"DOES_NOT_EXIST", "Master":false}
+	]
+}

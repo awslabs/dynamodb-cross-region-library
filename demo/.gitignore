@@ -1,0 +1,6 @@
+lib
+DynamoDBLocal
+dashboard/node_modules
+*.pid
+npm-debug.log
+

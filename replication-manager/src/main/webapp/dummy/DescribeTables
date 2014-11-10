@@ -1,0 +1,3 @@
+[
+{ "TableName":"table1", "Region":"us-east-1", "TableStatus":"REPLICATING", "Master":true, "KinesisApplicationName":"CrossRegionReplicationApplication-us-east-1-table1"}
+]
