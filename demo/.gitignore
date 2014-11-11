@@ -1,4 +1,3 @@
-lib
 DynamoDBLocal
 dashboard/node_modules
 *.pid

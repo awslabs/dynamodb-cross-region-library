@@ -96,7 +96,7 @@
           "wget http://dynamodb-cross-region.s3.amazonaws.com/cross-region-replication-demo.zip || error_exit 'Failed to download demo package.' \n",
           "unzip cross-region-replication-demo.zip || error_exit 'Failed to unpack package' \n",
           "cd cross-region-replication-demo; ./setup.sh || error_exit 'Failed to setup demo environment' \n",          
-          "./run.sh > log \n",                    
+          "./run.sh > log & \n",                    
           "sleep 15\n",
 
           "# All is well so signal success\n",
@@ -123,9 +123,11 @@
       "Properties" : {
         "GroupDescription" : "Enable HTTP access via port 80 and SSH access",
         "SecurityGroupIngress" : [
-          {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
           {"IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"},
-          {"IpProtocol" : "tcp", "FromPort" : "8081", "ToPort" : "8081", "CidrIp" : "0.0.0.0/0"},                    
+          {"IpProtocol" : "tcp", "FromPort" : "8000", "ToPort" : "8000", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "8001", "ToPort" : "8001", "CidrIp" : "0.0.0.0/0"},                    
+          {"IpProtocol" : "tcp", "FromPort" : "10000", "ToPort" : "10000", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "10001", "ToPort" : "10001", "CidrIp" : "0.0.0.0/0"},                    
           {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}}
         ]
       }      

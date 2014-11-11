@@ -2,7 +2,18 @@
 
 DYNAMODB_LOCAL_DIR=DynamoDBLocal
 DASHBOARD_DIR=dashboard
+CRR_MANAGER_WAR=dynamodb-cross-region-replication-manager.war
 mkdir -p lib
+
+## Copy DynamoDB Cross Region Replication Manager
+echo "## Setting up DynamoDB Cross Region Replication Manager\n"
+if [ ! -f lib/$CRR_MANAGER_WAR ]; then
+  cp -v ../replication-manager/target/$CRR_MANAGER_WAR ./lib/
+  if [ "$?" != "0" ]; then
+     echo "ERROR: Failed to copy the Cross Region Replication Manager war file. Please make sure if it was built correctly beforehand\n"
+     exit 1
+  fi
+fi
 
 ## Download dependencies
 pushd ./lib

@@ -1,5 +1,5 @@
 {
-  "name": "IoTHackDayDashboard",
+  "name": "DynamoDBCrossRegionReplicationDashboard",
   "version": "0.1.0",
   "dependencies": {},
   "devDependencies": {
