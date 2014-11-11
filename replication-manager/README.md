@@ -19,24 +19,29 @@ The Amazon DynamoDB Cross Region Replication (CRR) Manager an application that u
 - The final artifact is a standard web application archive (WAR) file that contains both the CRR Manager backend and the Web GUI frontend that can be deployed on a web servlet container such as jetty and glassfish.
 
 ## Getting started
+
 1. Install maven, node.js and ruby for your platform if not installed
    - maven: http://maven.apache.org/
    - node.js: http://nodejs.org/download/
    - ruby: https://www.ruby-lang.org/en/installation/
+
 2. Install tools necessary to build the Web GUI frontend, i.e. grunt, bower, coffee-script and compass
 ```
   sudo npm -g install grunt-cli bower coffee-script
   
   sudo gem install compass
 ```
+
 3. Run the following command to build a WAR file 
 ```
   mvn install
 ```
+
 4. Run the war file with e.g. Jetty or deploy on a web servlet container. One way to do this is to use jetty runner (https://wiki.eclipse.org/Jetty/Howto/Using_Jetty_Runner). 
 ```
   java -jar jettry-runner.jar target/dynamodb-cross-region-replication-manager.war
 ```
+
 5. Open the web inteface with your favorite web browser (the command below launches the website on port 8080)
 ```
    open http://localhost:8080

@@ -47,7 +47,7 @@ The CRR library emits the following Amazon CloudWatch metrics for each table in 
 - NumberUserWrites: number of user write requests sent to a table and then appeared in the DynamoDB Streams. 
 - NumberReplicationWrites: number of write requests a table gets from other replicas (not from users). 
 - NumberCheckpointedRecords: the shard subscriber propagates each user write to other tables for replicating and then receives acks from other tables after the Stream record is successfully applied to those tables. After obtaining acks from all other tables (meaning the update is successfully replicated in the replication group), the Stream record is ready to checkpoint to the DynamoDB Streams. This metric counts the number of checkpointed Stream records. 
-- AccumulatedRecordLatency: the accumulated end-to-end latency (the duration from the time a user makes a write request to the time the write is successfully replicated in all other tables) of user write requests. Dividing this metric by NumberUserWrites gives the average end-to-end latency of each request. 
+- AccumulatedRecordLatency: the accumulated end-to-end latency (the duration from the time a user makes a write request to the time the write is successfully replicated in all other tables) of user write requests. Dividing this metric by NumberCheckpointedRecords gives the average end-to-end latency of each request. 
 
 
 ## Release Notes

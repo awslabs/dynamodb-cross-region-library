@@ -5,6 +5,7 @@ This document contains detailed information on the design of the Cross Region Re
 ## Data Model
 
 The eventual consistent guarantees of the CRR Library are maintained by a few rules:
+
 1. All user writes are made to designated master tables only.
 2. The only operations allowed by the user are PutItem and UpdateItem. The DeleteItem and BatchWriteItem operations are not allowed. Deletes are possible by replacing items with a tombstone item. This is discussed in detail below.
 3. All writes by the user contain an attribute `<USER UPDATE FLAG>` to distinguish user writes from writes made by the CRR Library.
@@ -20,6 +21,7 @@ To get started, a Java SDK wrapper, `AmazonDynamoDBTimestampReplicationClient` i
 ### <a name="deletes"></a>Deletes
 
 The DeleteItem operation would remove the assumption that the `<TIMESTAMP>` attribute is available to compare with in an existing item. If an item does not exist in the table, a write must succeed to allow for the creation of items in the table. Here is an example of how a delete would result in an inconsistent state: 
+
 1. Begin with Table1 and Table2 with an item I0 in both tables.
 2. I1 replaces I0 in Table1 at Time1.
 3. Before I1 is replicated to Table 2, I0 is deleted in Table2 at Time2.
