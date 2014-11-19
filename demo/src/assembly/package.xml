@@ -1,0 +1,31 @@
+<assembly>
+<formats>
+  <format>zip</format>
+</formats>
+<includeBaseDirectory>false</includeBaseDirectory>
+<fileSets>
+  <fileSet>
+    <includes>
+      <include>README*</include>
+    </includes>
+  </fileSet>
+  <fileSet>
+    <outputDirectory>.</outputDirectory>
+    <directory>${project.build.directory}/${project.artifactId}</directory>
+    <includes>
+      <include>**/*.sh</include>
+    </includes>
+    <fileMode>755</fileMode>
+  </fileSet>
+  <fileSet>
+    <outputDirectory>.</outputDirectory>
+    <directory>${project.build.directory}/${project.artifactId}</directory>
+    <includes>
+      <include>**/*</include>
+    </includes>
+    <excludes>
+      <exclude>**/*.sh</exclude>
+    </excludes>
+  </fileSet>
+</fileSets>
+</assembly>

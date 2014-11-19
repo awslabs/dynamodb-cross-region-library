@@ -1,0 +1,24 @@
+{
+  "name": "SensorDashboardLauncher",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awslabs/dynamodb-cross-region-library.git"
+  },
+  "dependencies": {
+    "finalhandler": "^0.3.2",
+    "http-proxy": "^1.6.1",
+    "serve-static": "^1.7.1",
+    "uuid": "^2.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.0.23",
+    "dynamodb-doc": "git://github.com/awslabs/dynamodb-document-js-sdk.git"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

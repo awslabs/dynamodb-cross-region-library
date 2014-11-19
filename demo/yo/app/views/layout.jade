@@ -1,0 +1,30 @@
+doctype html
+html(lang='en')
+    head
+        include includes/head
+
+body(ng-app="IoTHackDayDashboard")
+
+
+    .container-fluid
+
+        block content
+
+        block footer
+
+    // build:js(.) scripts/vendor.js
+    // bower:js
+    // endbower
+    script(src='bower_components/dynamodb-doc/dynamodb-doc.min.js')
+    // endbuild
+    script(src='bower_components/rickshaw/rickshaw.min.js')
+
+    script(src='scripts/app.js')
+    script(src='scripts/config.js')
+    script(src='scripts/controllers/sensors.js')     
+    script(src='scripts/services/AWS.js')        
+    script(src='scripts/services/DynamoDBReader.js')            
+    script(src='scripts/services/graph.js')            
+
+    block scripts
+

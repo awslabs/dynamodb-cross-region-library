@@ -1,13 +1,15 @@
 {
-  "name": "DynamoDBCrossRegionReplicationDashboard",
+  "name": "SensorDashboard",
   "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/awslabs/dynamodb-cross-region-library.git"
+  },  
+  "dependencies": {
   },
-  "dependencies": {},
   "devDependencies": {
     "aws-sdk": "^2.0.19",
+    "dynamodb-doc": "git://github.com/awslabs/dynamodb-document-js-sdk.git",
     "coffee-script": "^1.8.0",
     "grunt": "^0.4.1",
     "grunt-autoprefixer": "^0.7.2",
@@ -46,10 +48,6 @@
     "load-grunt-tasks": "^0.4.0",
     "nconf": "^0.6.9",
     "time-grunt": "^0.3.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/awslabs/"
   },
   "engines": {
     "node": ">=0.10.0"

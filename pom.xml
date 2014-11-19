@@ -16,6 +16,7 @@
     <modules>
         <module>library</module>
         <module>replication-manager</module>
+        <module>demo</module>
     </modules>
 
     <licenses>

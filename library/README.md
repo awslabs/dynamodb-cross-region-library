@@ -20,7 +20,7 @@ The CRR Library provides a way to maintain eventually consistent views of the sa
 To build the CRR library:
   
 ```
-maven install
+mvn install
 ```
 
 This should create a jar file containing the Cross Region Replication library, which can be used in your own applications. A typical application follows the steps below to create a replication group:

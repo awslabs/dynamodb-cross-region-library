@@ -12,7 +12,8 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-// Generated on 2014-08-19 using generator-angular 0.9.5
+
+ // Generated on 2014-08-19 using generator-angular 0.9.5
 'use strict';
 
 // # Globbing
@@ -71,7 +72,7 @@ module.exports = function (grunt) {
     // Start DynamoDB Local
     bgShell: {
       dynamoDBLocal: {
-        cmd: 'java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar',
+        cmd: 'java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb',
         bg: true,
         stderr: function(){
         },
@@ -81,7 +82,10 @@ module.exports = function (grunt) {
       },
       prepareTables: {
         cmd: 'AWS_ACCESS_KEY=DummyAccessKey AWS_SECRET_ACCESS_KEY=DummySecretKey DYNAMODB_ENDPOINT=http://localhost:8000 DYNAMODB_REGION=us-east-1 delete_table_if_exists=1 coffee ./lib/prepare_tables.coffee'
-      }
+      },
+      generateData: {
+        cmd: 'AWS_ACCESS_KEY=DummyAccessKey AWS_SECRET_ACCESS_KEY=DummySecretKey DYNAMODB_ENDPOINT=http://localhost:8000 DYNAMODB_REGION=us-east-1 coffee ./lib/generate_dummy_data.coffee'
+      }      
     },
 
     // Environemnt settings
@@ -110,7 +114,8 @@ module.exports = function (grunt) {
             secretAccessKey: 'DummySecretKey',
             dynamoDBRegion: nconf.get('DYNAMODB_REGION_DEV'),
             dynamoDBEndpoint: nconf.get('DYNAMODB_ENDPOINT_DEV'),
-            devicesTable: nconf.get('TABLE_DEVICES')
+            commonTable: nconf.get('TABLE_COMMON'),
+            leaderboardTable: nconf.get('TABLE_LEADERBOARD')
           }
         }
       },
@@ -130,7 +135,8 @@ module.exports = function (grunt) {
             secretAccessKey: 'DummySecretKey',
             dynamoDBRegion: nconf.get('DYNAMODB_REGION_TEST'),
             dynamoDBEndpoint: nconf.get('DYNAMODB_ENDPOINT_TEST'),
-            devicesTable: nconf.get('TABLE_DEVICES')
+            commonTable: nconf.get('TABLE_COMMON'),
+            leaderboardTable: nconf.get('TABLE_LEADERBOARD')
           }
         }
       },
@@ -150,7 +156,8 @@ module.exports = function (grunt) {
             secretAccessKey: 'DummySecretKey',
             dynamoDBRegion: nconf.get('DYNAMODB_REGION_PROD'),
             dynamoDBEndpoint: nconf.get('DYNAMODB_ENDPOINT_PROD'),
-            devicesTable: nconf.get('TABLE_DEVICES')
+            commonTable: nconf.get('TABLE_COMMON'),
+            leaderboardTable: nconf.get('TABLE_LEADERBOARD')
           }
         }
       }
@@ -230,13 +237,6 @@ module.exports = function (grunt) {
     // The actual grunt server settings
     connect: {
       proxies: [
-        {
-          context: '/api',
-          host: 'localhost',
-          port: 8080,
-          https: false,
-          changeOrigin: false
-        },
         {
           context: '/dynamodb',
           host: 'localhost',
@@ -576,6 +576,11 @@ module.exports = function (grunt) {
           dest: '<%= yeoman.dist %>'
         }, {          
           expand: true,
+          cwd: 'bower_components/rickshaw/examples/images/',
+          src: '*.png',
+          dest: '<%= yeoman.dist %>/images'
+        }, {          
+          expand: true,
           cwd: '.',
           src: 'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*',
           dest: '<%= yeoman.dist %>'
@@ -589,17 +594,13 @@ module.exports = function (grunt) {
       },
       tmp: {
         files: [
-        {
+        {          
           expand: true,
-          cwd: 'bower_components/ui.bootstrap',
-          src: 'template/modal/*',
-          dest: '.tmp/'
-        }, {          
-          expand: true,
-          cwd: 'bower_components/blueimp-gallery/',
-          src: 'img/*',
-          dest: '.tmp'
-        }]                           
+          cwd: 'bower_components/rickshaw/examples/images/',
+          src: '*.png',
+          dest: '.tmp/images'
+        }
+        ]                           
       },
       styles: {
         expand: true,
@@ -640,9 +641,15 @@ module.exports = function (grunt) {
     ]);
   });
 
-  grunt.registerTask('prepare_tables', 'Creates tables in DynamoDB Local and ingest image data', function () {
+  grunt.registerTask('prepare_tables', 'Creates tables in DynamoDB Local', function () {
     grunt.task.run([
       'bgShell:prepareTables'
+    ]);
+  });
+
+  grunt.registerTask('generate_data', 'Generates dummy data and writes to the table', function () {
+    grunt.task.run([
+      'bgShell:generateData'
     ]);
   });
 
@@ -655,14 +662,14 @@ module.exports = function (grunt) {
     grunt.task.run([
       'clean:server',
       'ngconstant:development',
-//      'launch_dynamodb_local',
+      'launch_dynamodb_local',
       'jade:compile',
       'copy:tmp',
       'wiredep',
       'concurrent:server',
       'autoprefixer',
       'configureProxies:server',
-//      'prepare_tables',
+      'prepare_tables',
       'connect:livereload',
       'watch'
     ]);
@@ -671,14 +678,14 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'clean:server',
     'ngconstant:test', 
-//    'launch_dynamodb_local',
+    'launch_dynamodb_local',
     'copy:tmp',
     'jade:dist',    
     'wiredep',   
     'concurrent:test',
     'configureProxies:server',
     'autoprefixer',
-//    'prepare_tables',
+    'prepare_tables',
     'connect:test',
     'karma'
   ]);
@@ -699,8 +706,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('default', [
-//    'newer:jshint',
-//    'test',
+    'newer:jshint',
     'build'
   ]);
 };

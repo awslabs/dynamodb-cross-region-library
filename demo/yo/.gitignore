@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-launcher
+.tmp
+.dependencies
+.sass-cache
+bower_components
+.DS_Store

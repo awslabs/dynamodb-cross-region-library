@@ -1,7 +1,5 @@
-DynamoDBLocal
-*.pid
-npm-debug.log
 target
+npm-debug.log
 yo/.sass-cache
 yo/.tmp
 yo/bower_components

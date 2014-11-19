@@ -12,21 +12,24 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-angular.module('DynamoDBCrossRegionReplicationDashboard')
-	.directive('navigation', function($window, $log, $rootScope) {
-		return {
-			restrict: 'EA',
-			scope: {
-				active: '=',
-				groups: '=',
-				activeGroup: '=',
-				tables: '=',
-				activeTable: '='
-	     	},
-			templateUrl: 'views/partials/navigation.html',
-			link: function(scope, element, attrs) {
-				$log.debug(scope);
-				$('#' + scope.active).addClass('active');
-			}
-		}
-	});
+
+ 'use strict';
+angular.module('IoTHackDayDashboard', 
+	[
+    'ngRoute',
+    'ngSanitize',
+    'ngTouch',
+    'config'
+	]).
+    config(['$routeProvider', function($routeProvider) {
+        $routeProvider.
+        when('/', {
+            templateUrl: 'views/partials/sensors.html',
+            controller: 'SensorsCtrl'
+        }).
+        otherwise({
+            redirectTo: '/'
+        });
+    }]);
+
+

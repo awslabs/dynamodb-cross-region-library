@@ -12,6 +12,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 // Karma configuration
 // http://karma-runner.github.io/0.12/config/configuration-file.html
 // Generated on 2014-08-19 using
@@ -57,13 +58,10 @@ module.exports = function(config) {
        'bower_components/angular-sanitize/angular-sanitize.js',
        'bower_components/angular-touch/angular-touch.js',
        'bower_components/angular-route/angular-route.js',
+       'bower_components/d3/d3.js',
+       'bower_components/jquery-ui/jquery-ui.js',
        'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
        'bower_components/aws-sdk/dist/aws-sdk.js',
-       'bower_components/bootstrap/dist/js/bootstrap.js',
-       'bower_components/metisMenu/dist/metisMenu.js',
-       'bower_components/angular-uuid4/angular-uuid4.js',
-       'bower_components/d3/d3.js',
-       'bower_components/nvd3/nv.d3.js',
        'bower_components/angular-mocks/angular-mocks.js',
        // endbower
        'app/scripts/**/*.js',
