@@ -1,8 +1,0 @@
-target
-npm-debug.log
-yo/.sass-cache
-yo/.tmp
-yo/bower_components
-yo/dist
-yo/node_modules
-

@@ -1,41 +1,141 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
-    <artifactId>dynamodb-cross-region-parent</artifactId>
+    <artifactId>dynamodb-cross-region-replication</artifactId>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>Amazon DynamoDB Cross Region</name>
-    <version>0.1.0-SNAPSHOT</version>
-    <description>The Amazon DynamoDB Cross Region Replication Library and an example replication manager implementation.</description>
-    <url>https://aws.amazon.com/dynamodb</url>
+    <name>DynamoDB Cross-region Replication Library</name>
+    <description>
+        DynamoDB cross-region replication library is composed of various components that form a client-side library,  
+    </description>
+    <url>http://aws.amazon.com/dynamodb</url>
     <scm>
         <url>https://github.com/awslabs/dynamodb-cross-region-library.git</url>
     </scm>
+    <properties>
+        <aws.java.sdk.version>[1.10.5.1, 2.0.0)</aws.java.sdk.version>
+    </properties>
+    <developers>
+        <developer>
+            <name>Raymond Lin</name>
+            <email>raymolin@amazon.com</email>
+        </developer>
+        <developer>
+            <name>Daniela Miao</name>
+            <email>dym@amazon.com</email>
+        </developer>
+        <developer>
+            <name>Jeffrey Nieh</name>
+            <email>jeffren@amazon.com</email>
+        </developer>
+        <developer>
+            <name>Ben Schwartz</name>
+            <email>schwar@amazon.com</email>
+        </developer>
+        <developer>
+            <name>Kenta Yasukawa</name>
+            <email>kenta.yasukawa@gmail.com</email>
+        </developer>
+    </developers>
 
-    <modules>
-        <module>library</module>
-        <module>replication-manager</module>
-        <module>demo</module>
-    </modules>
+    <contributors>
+        <contributor>
+            <name>Alexander Patrikalakis</name>
+            <email>amcp@me.com</email>
+            <url>https://www.linkedin.com/in/amcpatrix/en</url>
+        </contributor>
+        <contributor>
+            <name>Johnny Wu</name>
+            <email>johnnywu@amazon.com</email>
+        </contributor>
+    </contributors>
+
+    <inceptionYear>2014</inceptionYear>
 
     <licenses>
         <license>
             <name>Amazon Software License</name>
-            <url>https://aws.amazon.com/asl</url>
+            <url>http://aws.amazon.com/asl/</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <id>amazonwebservices</id>
-            <organization>Amazon Web Services</organization>
-            <organizationUrl>https://aws.amazon.com</organizationUrl>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
-</project> 
+    <modules>
+        <module>dynamodb-connectors</module>
+        <module>dynamodb-replication-coordinator</module>
+        <module>dynamodb-replication-server</module>
+        <module>dynamodb-table-copy-client</module>
+        <module>dynamodb-table-copy-nanny</module>
+    </modules>
 
+    <build>
+        <directory>${basedir}/target</directory>
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.3.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-dependency-convergence</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <DependencyConvergence />
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>             
+                        <id>copy-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.amazonaws</groupId>
+                                    <artifactId>dynamodb-connectors</artifactId>
+                                    <version>1.0.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.amazonaws</groupId>
+                                    <artifactId>dynamodb-replication-coordinator</artifactId>
+                                    <version>1.0.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.amazonaws</groupId>
+                                    <artifactId>dynamodb-replication-server</artifactId>
+                                    <version>1.0.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.amazonaws</groupId>
+                                    <artifactId>dynamodb-table-copy-client</artifactId>
+                                    <version>1.0.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.amazonaws</groupId>
+                                    <artifactId>dynamodb-table-copy-nanny</artifactId>
+                                    <version>1.0.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

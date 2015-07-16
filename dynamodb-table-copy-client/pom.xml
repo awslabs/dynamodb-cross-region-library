@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>dynamodb-table-copy-client</artifactId>
+    <version>1.0.0</version>
+
+    <name>DynamoDB Table Copy Client</name>
+    <url>https://github.com/awslabs/dynamodb-cross-region-library</url>
+
+    <properties>
+        <aws.java.sdk.version>[1.10.5.1, 2.0.0)</aws.java.sdk.version>
+        <junit.version>4.12</junit.version>
+        <easymock.version>3.2</easymock.version>
+        <maven.compiler.version>3.3</maven.compiler.version>
+        <java.jdk.version>1.7</java.jdk.version>
+    </properties>
+
+    <inceptionYear>2015</inceptionYear>
+    <licenses>
+        <license>
+            <name>Amazon Software License</name>
+            <url>http://aws.amazon.com/asl/</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Raymond Lin</name>
+            <email>raymolin@amazon.com</email>
+        </developer>
+        <developer>
+            <name>Jeffrey Nieh</name>
+            <email>jeffren@amazon.com</email>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>${aws.java.sdk.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>${easymock.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- not building fat jar as there is no main class, class used as a library only -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>${java.jdk.version}</source>
+                    <target>${java.jdk.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

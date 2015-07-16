@@ -1,0 +1,25 @@
+{
+  "name": "DynamoDBUtils",
+  "version": "0.1.0",
+  "dependencies": {
+    "JSONStream": "^1.0.3",
+    "async": "^0.9.0",
+    "aws-sdk": "^2.0.19",
+    "command-line-args": "^0.5.9",
+    "dynamodb-doc": "git://github.com/awslabs/dynamodb-document-js-sdk.git",
+    "redis": "^0.12.1",
+    "redis-scanstreams": "^1.0.3",
+    "winston": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "coffee-script": "^1.9.2",
+    "mocha": "^1.21.5"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test mocha --compilers coffee:coffee-script/register"
+  }
+}
