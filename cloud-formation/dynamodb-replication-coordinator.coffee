@@ -75,7 +75,7 @@ Resources =
     Properties:
       ApplicationName: ref("DynamoDBReplicationCoordinatorApplication")
       SourceBundle:
-        S3Bucket: DynamoDBReplicationCoordinatorApplicationSourceS3Bucket
+        S3Bucket: join([DynamoDBReplicationCoordinatorApplicationSourceS3Bucket, "-", ref("AWS::Region")])
         S3Key: DynamoDBReplicationCoordinatorApplicationSourceS3Key
   
   CoordinatorConfigurationTemplate:

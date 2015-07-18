@@ -73,7 +73,7 @@ public class CommandLineInterface {
     /**
      * KCL constants
      */
-    public static final int IDLE_TIME_BETWEEN_READS = 1;
+    public static final int IDLE_TIME_BETWEEN_READS = 500;
     public static final int STREAMS_RECORDS_LIMIT = 1000;
     public static final int KCL_RECORD_BUFFER_SIZE = 10 * STREAMS_RECORDS_LIMIT;
     public static final String WORKER_LABEL = "worker";

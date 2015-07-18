@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
     <artifactId>dynamodb-cross-region-replication</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
     <name>DynamoDB Cross-region Replication Library</name>
     <description>
@@ -103,19 +103,19 @@
                                 <artifactItem>
                                     <groupId>com.amazonaws</groupId>
                                     <artifactId>dynamodb-connectors</artifactId>
-                                    <version>1.0.0</version>
+                                    <version>1.0.1</version>
                                     <type>jar</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.amazonaws</groupId>
                                     <artifactId>dynamodb-replication-coordinator</artifactId>
-                                    <version>1.0.0</version>
+                                    <version>1.0.1</version>
                                     <type>jar</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.amazonaws</groupId>
                                     <artifactId>dynamodb-replication-server</artifactId>
-                                    <version>1.0.0</version>
+                                    <version>1.0.1</version>
                                     <type>jar</type>
                                 </artifactItem>
                                 <artifactItem>
@@ -127,7 +127,7 @@
                                 <artifactItem>
                                     <groupId>com.amazonaws</groupId>
                                     <artifactId>dynamodb-table-copy-nanny</artifactId>
-                                    <version>1.0.0</version>
+                                    <version>1.0.1</version>
                                     <type>jar</type>
                                 </artifactItem>
                             </artifactItems>

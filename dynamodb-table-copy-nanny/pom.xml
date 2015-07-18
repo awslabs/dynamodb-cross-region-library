@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
     <artifactId>dynamodb-table-copy-nanny</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>DynamoDB Table Copy Nanny</name>
     <url>https://github.com/awslabs/dynamodb-cross-region-library</url>
     <properties>
         <aws.java.sdk.version>[1.10.5.1, 2.0.0)</aws.java.sdk.version>
-        <replication.coordinator.version>1.0.0</replication.coordinator.version>
-        <table.copy.client.version>1.0.0</table.copy.client.version>
+        <replication.coordinator.version>[1.0.0, 2.0.0)</replication.coordinator.version>
+        <table.copy.client.version>[1.0.0, 2.0.0)</table.copy.client.version>
         <junit.version>4.12</junit.version>
         <easymock.version>3.2</easymock.version>
         <powermock.version>1.6.2</powermock.version>

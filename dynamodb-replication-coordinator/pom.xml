@@ -6,14 +6,14 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>dynamodb-replication-coordinator</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     
     <name>DynamoDB Replication Coordinator</name>
     <description>Amazon DynamoDB Replication Coordinator for Cross Region Replication library</description>
     <url>https://github.com/awslabs/dynamodb-cross-region-library</url>
 
     <properties>
-        <dynamodb-connectors.version>1.0.0</dynamodb-connectors.version>
+        <dynamodb-connectors.version>[1.0.0, 2.0.0)</dynamodb-connectors.version>
         <aws.dynamodblocal.version>1.10.5.1</aws.dynamodblocal.version>
         <aws.java.sdk.version>[1.10.5.1, 2.0.0)</aws.java.sdk.version>
         <easymock.version>3.2</easymock.version>

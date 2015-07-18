@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <artifactId>dynamodb-replication-server</artifactId>
     <packaging>jar</packaging>
 
@@ -9,7 +9,7 @@
     <url>https://aws.amazon.com/dynamodb</url>
     <properties>
         <aws.java.sdk.version>[1.10.5.1, 2.0.0)</aws.java.sdk.version>
-        <dynamodb.replication.coordinator.version>1.0.0</dynamodb.replication.coordinator.version>
+        <dynamodb.replication.coordinator.version>[1.0.0, 2.0.0)</dynamodb.replication.coordinator.version>
         <jcommander.version>1.48</jcommander.version>
         <lombok.version>1.16.4</lombok.version>
         <maven.shade.version>2.4.1</maven.shade.version>
