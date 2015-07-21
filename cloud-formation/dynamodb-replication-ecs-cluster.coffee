@@ -58,12 +58,6 @@ Resources =
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription : "Security group for DynamoDB replication worker"
-      SecurityGroupIngress : setOnlyIf("KeyNameExists", [
-            IpProtocol : "tcp"
-            FromPort : "22"
-            ToPort : "22"
-            CidrIp : "0.0.0.0/0"
-        ])
 
   EcsInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
