@@ -59,7 +59,7 @@ public class CommandLineArgs {
 
     public static final String SERVER_HOST_PORT = "--port";
     @Parameter(names = SERVER_HOST_PORT, description = "Port that the coordinator server will be hosted at")
-    public static final int port = 7000;
+    public static int port = 7000;
 
     public int getPort() {
         return port;

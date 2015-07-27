@@ -13,6 +13,8 @@
         <jcommander.version>1.48</jcommander.version>
         <lombok.version>1.16.4</lombok.version>
         <maven.shade.version>2.4.1</maven.shade.version>
+        <maven.compiler.version>3.3</maven.compiler.version>
+        <java.jdk.version>1.7</java.jdk.version>
     </properties>
     
     <developers>
@@ -123,6 +125,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.jdk.version}</source>
+                    <target>${java.jdk.version}</target>
+                </configuration>
+                <version>${maven.compiler.version}</version>
             </plugin>
         </plugins>
     </build>
