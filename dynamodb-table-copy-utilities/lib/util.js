@@ -73,9 +73,9 @@ var getDynamoDBClient = function(region, endpoint){
                 agent: new http.Agent({ keepAlive: true})
             };            
         }
-        dynamoDBClients[region] = new DOC.DynamoDB(new AWS.DynamoDB(params));
+        dynamoDBClients[region+endpoint] = new DOC.DynamoDB(new AWS.DynamoDB(params));
     }
-    return dynamoDBClients[region];
+    return dynamoDBClients[region+endpoint];
 };
 
 var parseS3Url = function(url){
