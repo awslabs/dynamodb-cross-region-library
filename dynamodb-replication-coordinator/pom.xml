@@ -94,6 +94,21 @@
             <artifactId>aws-java-sdk-dynamodb</artifactId>
             <version>${aws.java.sdk.version}</version>
         </dependency>
+
+        <!-- ECS SDK -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-ecs</artifactId>
+            <version>${aws.java.sdk.version}</version>
+        </dependency>
+
+        <!-- CloudFormation SDK -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cloudformation</artifactId>
+            <version>${aws.java.sdk.version}</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
