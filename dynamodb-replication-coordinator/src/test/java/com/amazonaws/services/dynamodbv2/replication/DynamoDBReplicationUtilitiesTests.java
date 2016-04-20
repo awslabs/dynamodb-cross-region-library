@@ -82,7 +82,7 @@ public class DynamoDBReplicationUtilitiesTests {
     }
 
     @Test
-    public void testCreateTableIfNotExists() throws Exception {
+    public void testCreateTableIfNotExistsWithIndexes() throws Exception {
         // Set up Key Schema
         List<KeySchemaElementDescription> tableKeySchema = new ArrayList<KeySchemaElementDescription>();
         tableKeySchema.add(new KeySchemaElementDescription("hashkey", "HASH"));
@@ -122,6 +122,40 @@ public class DynamoDBReplicationUtilitiesTests {
         // Set up the replication group member
         DynamoDBReplicationGroupMember member = new DynamoDBReplicationGroupMember().withARN(arn.getArnString()).withEndpoint(DYNAMODB_LOCAL_ENDPOINT)
             .withGlobalSecondaryIndexes(GSIs).withLocalSecondaryIndexes(LSIs).withProvisionedThroughput(provisionedThroughput).withStreamsEnabled(true);
+
+        // Set up the replication group
+        DynamoDBReplicationGroup group = new DynamoDBReplicationGroup().withAttributeDefinitions(attributeDefinitions).withKeySchema(tableKeySchema)
+            .withReplicationGroupStatus(DynamoDBReplicationGroupStatus.CREATING).withReplicationGroupUUID("ReplicationGroupUUID")
+            .withReplicationGroupMembers(new HashMap<String, DynamoDBReplicationGroupMember>());
+        group.addReplicationGroupMember(member);
+
+        // Test create table when it does not exist
+        DynamoDBReplicationUtilities.createTableIfNotExists(group, member, accounts);
+    }
+
+    @Test
+    public void testCreateTableIfNotExists() throws Exception {
+        // Set up Key Schema
+        List<KeySchemaElementDescription> tableKeySchema = new ArrayList<KeySchemaElementDescription>();
+        tableKeySchema.add(new KeySchemaElementDescription("hashkey", "HASH"));
+        tableKeySchema.add(new KeySchemaElementDescription("rangekey", "RANGE"));
+
+        // Set up Attribute Definitions assuming base table has an index
+        List<AttributeDefinitionDescription> attributeDefinitions = new ArrayList<AttributeDefinitionDescription>();
+        attributeDefinitions.add(new AttributeDefinitionDescription("hashkey", "S"));
+        attributeDefinitions.add(new AttributeDefinitionDescription("rangekey", "S"));
+        attributeDefinitions.add(new AttributeDefinitionDescription("indexHashKey", "S"));
+        attributeDefinitions.add(new AttributeDefinitionDescription("indexRangeKey", "S"));
+
+        // Set up ARN object
+        DynamoDBArn arn = new DynamoDBArn().withAccountNumber("123456654321").withRegion("us-east-1").withTableName("testTable");
+
+        // Set up Provisioned Throughput
+        ProvisionedThroughputDesc provisionedThroughput = new ProvisionedThroughputDesc(1l, 1l);
+
+        // Set up the replication group member
+        DynamoDBReplicationGroupMember member = new DynamoDBReplicationGroupMember().withARN(arn.getArnString()).withEndpoint(DYNAMODB_LOCAL_ENDPOINT)
+            .withProvisionedThroughput(provisionedThroughput).withStreamsEnabled(true);
 
         // Set up the replication group
         DynamoDBReplicationGroup group = new DynamoDBReplicationGroup().withAttributeDefinitions(attributeDefinitions).withKeySchema(tableKeySchema)
@@ -176,7 +210,8 @@ public class DynamoDBReplicationUtilitiesTests {
             "dynamodb.us-east-1.amazonaws.com");
         DynamoDBConnectorDescription connector = new DynamoDBConnectorDescription().withSourceTableEndpoint("https://preview-dynamodb.eu-west-1.amazonaws.com")
             .withSourceTableArn(new DynamoDBArn().withAccountNumber("654321123456").withRegion("eu-west-1").withTableName("dym-xrr-source").getArnString());
-        String hashedStackName = DynamoDBReplicationUtilities.getHashedServiceName(connector.getSourceTableArn(), member.getArn(), "DynamoDBReplicationConnector");
+        String hashedStackName = DynamoDBReplicationUtilities.getHashedServiceName(connector.getSourceTableArn(), member.getArn(),
+            "DynamoDBReplicationConnector");
         assertEquals("DynamoDBReplicationConnectorcf59eba954739791c31f83b2228161ed", hashedStackName);
     }
 }

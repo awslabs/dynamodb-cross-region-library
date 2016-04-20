@@ -22,6 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -37,6 +39,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchema;
 import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchemas;
 import com.amazonaws.services.dynamodbv2.datamodeling.ItemConverter;
+import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinitionDescription;
 import com.amazonaws.services.dynamodbv2.model.Constants;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
@@ -46,7 +49,10 @@ import com.amazonaws.services.dynamodbv2.model.DynamoDBConnectorDescription;
 import com.amazonaws.services.dynamodbv2.model.DynamoDBReplicationGroup;
 import com.amazonaws.services.dynamodbv2.model.DynamoDBReplicationGroupMember;
 import com.amazonaws.services.dynamodbv2.model.DynamoDBTableCopyDescription;
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElementDescription;
+import com.amazonaws.services.dynamodbv2.model.LocalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
@@ -238,11 +244,9 @@ public class DynamoDBReplicationUtilities {
         try {
             DescribeTableResult result = ddbClient.describeTable(tableName);
 
-            // verify existing table matches the replication group attribute definitions and key schema
+            // verify existing table matches the replication group key schema, no need to check attribute definitions because the tables may not have the same
+            // indexes defined
             TableDescription table = result.getTable();
-            coordinatorAssert(
-                table.getAttributeDefinitions().equals(AttributeDefinitionDescription.convertToAttributeDefinitions(group.getAttributeDefinitions())),
-                "Existing attribution definitions of replication member table do not match the group's.");
             coordinatorAssert(table.getKeySchema().equals(KeySchemaElementDescription.convertToKeySchemaElements(group.getKeySchema())),
                 "Existing key schema of replication member table does not match the group's");
 
@@ -254,23 +258,65 @@ public class DynamoDBReplicationUtilities {
                 }
             }
         } catch (ResourceNotFoundException e) {
-            // Create table
+            // Create table request
             coordinatorAssert(createMember.getProvisionedThroughput() != null, "ProvisionedThroughput for member not specified for table creations.");
             CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
-                .withAttributeDefinitions(AttributeDefinitionDescription.convertToAttributeDefinitions(group.getAttributeDefinitions()))
-                .withKeySchema(KeySchemaElementDescription.convertToKeySchemaElements(group.getKeySchema()))
                 .withProvisionedThroughput(createMember.getProvisionedThroughput().toProvisionedThroughput());
+
+            // Set appropriate key schema
+            List<KeySchemaElement> keySchemaList = KeySchemaElementDescription.convertToKeySchemaElements(group.getKeySchema());
+            createTableRequest.setKeySchema(keySchemaList);
+
+            // Maintain a list of attribute names in the key schema of base table, global and local secondary indexes
+            Set<String> requiredAttributeNames = new HashSet<String>();
+            for (KeySchemaElement keySchema : keySchemaList) {
+                requiredAttributeNames.add(keySchema.getAttributeName());
+            }
+
+            // Set appropriate global secondary indexes
             if (createMember.getGlobalSecondaryIndexes() != null && !createMember.getGlobalSecondaryIndexes().isEmpty()) {
-                createTableRequest.setGlobalSecondaryIndexes(SecondaryIndexDesc.toGSIList(createMember.getGlobalSecondaryIndexes()));
+                // Convert and set appropriate list of GSIs
+                List<GlobalSecondaryIndex> gsiList = SecondaryIndexDesc.toGSIList(createMember.getGlobalSecondaryIndexes());
+                createTableRequest.setGlobalSecondaryIndexes(gsiList);
+
+                // Save the GSI key schema attribute names in the global index attribute list
+                for (GlobalSecondaryIndex index : gsiList) {
+                    for (KeySchemaElement keySchema : index.getKeySchema()) {
+                        requiredAttributeNames.add(keySchema.getAttributeName());
+                    }
+                }
             }
 
+            // Set appropriate local secondary indexes
             if (createMember.getLocalSecondaryIndexes() != null && !createMember.getLocalSecondaryIndexes().isEmpty()) {
-                createTableRequest.setLocalSecondaryIndexes(SecondaryIndexDesc.toLSIList(createMember.getLocalSecondaryIndexes()));
+                // Convert and set appropriate list of LSIs
+                List<LocalSecondaryIndex> lsiList = SecondaryIndexDesc.toLSIList(createMember.getLocalSecondaryIndexes());
+                createTableRequest.setLocalSecondaryIndexes(lsiList);
+
+                // Save the LSI key schema attribute names in the global index attribute list
+                for (LocalSecondaryIndex index : lsiList) {
+                    for (KeySchemaElement keySchema : index.getKeySchema()) {
+                        requiredAttributeNames.add(keySchema.getAttributeName());
+                    }
+                }
             }
 
+            // Set appropriate Streams configuration
             if (createMember.getStreamsEnabled()) {
                 createTableRequest.setStreamSpecification(replicationStreamSpec);
             }
+
+            // Remove unnecessary attribute definitions and set appropriately in the create request
+            List<AttributeDefinition> attrDefnList = AttributeDefinitionDescription.convertToAttributeDefinitions(group.getAttributeDefinitions());
+            Iterator<AttributeDefinition> iter = attrDefnList.iterator();
+            while (iter.hasNext()) {
+                AttributeDefinition attrDefn = iter.next();
+                if (!requiredAttributeNames.contains(attrDefn.getAttributeName())) {
+                    iter.remove();
+                }
+            }
+            createTableRequest.setAttributeDefinitions(attrDefnList);
+
             ddbClient.createTable(createTableRequest);
         }
         waitForTableActive(ddbClient, tableName, WAITING_TIME_OUT);
