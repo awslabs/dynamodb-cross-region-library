@@ -1,4 +1,6 @@
-FROM ubuntu
+# Version-locking to trusty to avoid JDK7 EOL issues.
+# Tags found here: https://hub.docker.com/r/library/ubuntu/tags
+FROM ubuntu:trusty
 
 # Update packages
 RUN apt-get update
