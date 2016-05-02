@@ -223,6 +223,7 @@ Resources =
                 "cloudformation:DescribeStacks",
                 "cloudformation:DescribeStackEvents",
                 "cloudformation:DescribeStackResource",
+		"cloudformation:ListStackResources",
                 "cloudformation:CancelUpdateStack",
                 #TODO: We should limit action(s) needed to only relevant actions
                 "ec2:*",
