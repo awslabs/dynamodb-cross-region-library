@@ -22,6 +22,7 @@ Important classes:
 
 * DynamoDBConnectorUtilities - Utility class with various methods that convert from region name to endpoints and vice versa. Note the `getTaskName()` method is used to generate a default taskName when the user does not provide one.
   * Default `taskName` = MD5 hash of (sourceTableRegion + sourceTableName + destinationTableRegion + destinationTableName)
+
     > **NOTE**: Each replication process requires a different `taskName`. Overlapping names will result in strange, unpredictable behavior. Please also delete this DynamoDB checkpoint table if you wish to completely restart replication. When running the same replication over multiple machines (same source & destination tables), then you must use the same `taskName` for each process becaues they use the DynamoDB checkpoint to coordinate and distribute work among them.
 
 The cross-region replication library relies heavily on the Kinesis Client Library (KCL) for stream consumption including shard leasing, work distribution and checkpointing logic. Please use the [official KCL documentation](http://docs.aws.amazon.com/streams/latest/dev/developing-consumers-with-kcl.html) for more information on troubleshooting and monitoring. KCL is open-sourced on [Github](https://github.com/awslabs/amazon-kinesis-client) as well.

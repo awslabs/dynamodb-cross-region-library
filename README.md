@@ -46,7 +46,7 @@ Use the `--help` option to view all available arguments to the connector executa
 * Sets up a [Kinesis Client Library (KCL)](https://github.com/awslabs/amazon-kinesis-client) worker to consume the DymamoDB Stream of the source table
 * Uses a custom implementation of the [Kinesis Connector Library](https://github.com/awslabs/amazon-kinesis-connectors) to apply incoming stream records to the destination table in real-time
 * Creates a DynamoDB checkpoint table using the given or default `taskName`, used when restoring from crashes.
-  * > **WARNING**: Each replication process requires a different `taskName`. Overlapping names will result in strange, unpredictable behavior. Please also delete this DynamoDB checkpoint table if you wish to completely restart replication. See how a default `taskName` is calculated below in section "Advanced: running replication process across multiple machines".
+  * **WARNING**: Each replication process requires a different `taskName`. Overlapping names will result in strange, unpredictable behavior. Please also delete this DynamoDB checkpoint table if you wish to completely restart replication. See how a default `taskName` is calculated below in section "Advanced: running replication process across multiple machines".
 * Publishes default KCL CloudWatch metrics to report number of records and bytes processed. For more information please refer to the [official KCL documentation.](http://docs.aws.amazon.com/streams/latest/dev/monitoring-with-kcl.html)
 * Produces logs locally according to the default log4j configuration file, which produces 2 separate log files: one for the KCL process and one for the rest of the connector application. You may use your own log4j.properties file to override these defaults. In addition, AWS CloudWatch offers a [monitoring agent](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchLogs.html) to automatically push local logs to your AWS CloudWatch account, if needed.
 
@@ -60,10 +60,12 @@ With extremely large tables or tables with high throughput, it might be necessar
 ## Advanced: replicating multiple tables
 
 Each instantiation of the jar executable is for a single replication path only (i.e. one source DynamoDB table to one destination DynamoDB table). To enable replication for multiple tables or create multiple replicas of the same table, a separate instantiation of the cross-region replication library is required. Some examples of replication setup:
-Replication Scenario | Number of Processes Required
--------------------- | ----------------------------
-One source table in us-east-1, one replica in each of us-west-2, us-west-1, and eu-west-1 | 3 cross-region replication processes required: one from us-east-1 to us-west-2, one from us-east-1 to us-west-1, and one from us-east-1 to eu-west-1
-Two source tables (table1 & table2) in us-east-1, both replicated to us-west-2 | 2 cross-region replication processes required: one for table1 from us-east-1 to us-west-2, and one for table2 from us-east-1 to us-west-2
+
+**Replication Scenario 1**: One source table in us-east-1, one replica in each of us-west-2, us-west-1, and eu-west-1 
+* Number of Processes Required: 3 cross-region replication processes required: one from us-east-1 to us-west-2, one from us-east-1 to us-west-1, and one from us-east-1 to eu-west-1
+
+**Replication Scenario 2**: Two source tables (table1 & table2) in us-east-1, both replicated separately to us-west-2 
+* Number of Processes Required: 2 cross-region replication processes required: one for table1 from us-east-1 to us-west-2, and one for table2 from us-east-1 to us-west-2 
 
 **Can multiple cross-region replication processes run on the same machine?**
 * Yes, feel free to launch multiple processes on the same machine to optimize resource usage. However, it is highly recommended that you monitor one process first to understand its CPU, memory, network and other resource footprint. In general, bigger tables require more resources and high-throughput tables require more resources.
