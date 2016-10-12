@@ -43,7 +43,7 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 ```
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
-* Sets up a [Kinesis Client Library (KCL)](https://github.com/awslabs/amazon-kinesis-client) worker to consume the DymamoDB Stream of the source table
+* Sets up a [Kinesis Client Library (KCL)](https://github.com/awslabs/amazon-kinesis-client) worker to consume the DynamoDB Stream of the source table
 * Uses a custom implementation of the [Kinesis Connector Library](https://github.com/awslabs/amazon-kinesis-connectors) to apply incoming stream records to the destination table in real-time
 * Creates a DynamoDB checkpoint table using the given or default `taskName`, used when restoring from crashes.
   * **WARNING**: Each replication process requires a different `taskName`. Overlapping names will result in strange, unpredictable behavior. Please also delete this DynamoDB checkpoint table if you wish to completely restart replication. See how a default `taskName` is calculated below in section "Advanced: running replication process across multiple machines".
