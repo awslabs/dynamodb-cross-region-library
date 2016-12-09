@@ -40,6 +40,7 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 		```
 			./build-with-docker.sh
 		```
+		* if you want to push this to your own docker repo for use on non local machines you will have to tag the image generated and push to a repo you control *
 
 2. This produces the target jar in the target/ directory, to start the replication process:
 	* with Java
@@ -49,7 +50,6 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 		```
 	* with Docker 
 		```
-			docker build -t awslabs/dynamodb-cross-region-replication:1.1.0
 			docker run --rm -ti awslabs/dynamodb-cross-region-replication:1.1.0 "java" "-jar" "/home/dynamodb-cross-region-replication-1.1.0.jar" --sourceEndpoint YOUR_ENDPOINT --sourceTable YOUR_TABLE --destinationEndpoint YOUR_ENDPOINT --destinationTable YOUR_TABLE
 		```
 
