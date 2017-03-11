@@ -5,3 +5,4 @@
 target
 **/target
 /bin/
+*.log
