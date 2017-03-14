@@ -41,7 +41,6 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClient;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
-import com.amazonaws.services.cloudwatch.model.PutMetricDataResult;
 import com.amazonaws.services.cloudwatch.model.StandardUnit;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient;
@@ -409,9 +408,9 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
             return;
         }
         final PutMetricDataRequest request = new PutMetricDataRequest().withNamespace(applicationName).withMetricData(metrics);
-        cloudwatch.putMetricDataAsync(request, new AsyncHandler<PutMetricDataRequest, PutMetricDataResult>() {
+        cloudwatch.putMetricDataAsync(request, new AsyncHandler<PutMetricDataRequest, Void>() {
             @Override
-            public void onSuccess(PutMetricDataRequest request, PutMetricDataResult result) {
+            public void onSuccess(PutMetricDataRequest request, Void result) {
                 LOGGER.trace("Published metric: " + request);
             }
 
