@@ -3,3 +3,8 @@
 .tmp
 target
 **/target
+.idea
+*.iml
+*.log
+*~
+.*~

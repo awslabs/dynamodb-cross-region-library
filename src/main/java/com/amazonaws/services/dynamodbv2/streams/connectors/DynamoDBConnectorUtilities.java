@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
@@ -27,7 +28,6 @@ import com.amazonaws.services.dynamodbv2.model.DescribeStreamRequest;
 import com.amazonaws.services.dynamodbv2.model.StreamDescription;
 import com.amazonaws.services.dynamodbv2.model.StreamViewType;
 import com.amazonaws.util.AwsHostNameUtils;
-import com.beust.jcommander.ParameterException;
 
 public class DynamoDBConnectorUtilities {
 
@@ -44,21 +44,24 @@ public class DynamoDBConnectorUtilities {
      *            region of the source table
      * @param destinationRegion
      *            region of the destination table
-     * @param params
-     *            command line arguments, use to check if there exists an user-specified task name
+     * @param suppliedTaskName
+     *            the user supplied task name
+     * @param sourceTableName
+     *            the source table name
+     * @param destinationTableName
+     *            the destination table name
      * @return the generated task name
-     * @throws UnsupportedEncodingException
      */
-    public static String getTaskName(Region sourceRegion, Region destinationRegion, CommandLineArgs params)
-        throws UnsupportedEncodingException {
+    public static String getTaskName(String sourceRegion, String destinationRegion, String suppliedTaskName,
+                                     String sourceTableName, String destinationTableName) {
         String taskName;
-        if (params.getTaskName() != null) {
-            taskName = DynamoDBConnectorConstants.SERVICE_PREFIX + params.getTaskName();
+        if (!Strings.isNullOrEmpty(suppliedTaskName)) {
+            taskName = DynamoDBConnectorConstants.SERVICE_PREFIX + suppliedTaskName;
             if (taskName.length() > DynamoDBConnectorConstants.DYNAMODB_TABLENAME_LIMIT) {
-                throw new ParameterException("Provided taskname is too long!");
+                throw new IllegalArgumentException("Provided taskname is too long!");
             }
         } else {
-            taskName = sourceRegion + params.getSourceTable() + destinationRegion + params.getDestinationTable();
+            taskName = sourceRegion + sourceTableName + destinationRegion + destinationTableName;
             // hash stack name using MD5
             if (DynamoDBConnectorConstants.MD5_DIGEST == null) {
                 // see if we can generate a taskname without hashing
@@ -67,9 +70,13 @@ public class DynamoDBConnectorUtilities {
                         "Generated taskname is too long and cannot be hashed due to improperly initialized MD5 digest object!");
                 }
             } else {
-                taskName = DynamoDBConnectorConstants.SERVICE_PREFIX
-                    + new String(Hex.encodeHex(DynamoDBConnectorConstants.MD5_DIGEST.digest(taskName
-                        .getBytes(DynamoDBConnectorConstants.BYTE_ENCODING))));
+                try {
+                    taskName = DynamoDBConnectorConstants.SERVICE_PREFIX
+                            + new String(Hex.encodeHex(DynamoDBConnectorConstants.MD5_DIGEST.digest(taskName
+                            .getBytes(DynamoDBConnectorConstants.BYTE_ENCODING))));
+                } catch (UnsupportedEncodingException e) {
+                    throw new IllegalArgumentException("taskName was not encoded as " + DynamoDBConnectorConstants.BYTE_ENCODING, e);
+                }
             }
         }
 
@@ -84,7 +91,11 @@ public class DynamoDBConnectorUtilities {
      * @return the extracted region corresponding to the given endpoint
      */
     public static Region getRegionFromEndpoint(String endpoint) {
-        return Region.getRegion(Regions.fromName(AwsHostNameUtils.parseRegionName(endpoint, null)));
+        final String regionName = AwsHostNameUtils.parseRegion(endpoint, null);
+        if (regionName == null) {
+            return null;
+        }
+        return Region.getRegion(Regions.fromName(regionName));
     }
 
     /**
@@ -95,6 +106,9 @@ public class DynamoDBConnectorUtilities {
      * @return the extracted Streams endpoint corresponding to the given DynamoDB endpoint
      */
     public static String getStreamsEndpoint(String endpoint) {
+        if (!endpoint.contains("dynamodb")) {
+            return endpoint; //only try to convert canonical
+        }
         String regex = DynamoDBConnectorConstants.PROTOCOL_REGEX;
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(endpoint);
