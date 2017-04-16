@@ -31,16 +31,27 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 0. Enable DynamoDB Streams on your source table with StreamViewType set to "New and old images". For more information on how to do this, please refer to our [offical DynamoDB Streams documentation.](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html)
 
 1. Build the library:
+	* with Maven:
 
-```
-    mvn install
-```
+		```
+			mvn install
+		```
+	* with Docker
+		```
+			./build-with-docker.sh
+		```
+		* if you want to push this to your own docker repo for use on non local machines you will have to tag the image generated and push to a repo you control *
 
 2. This produces the target jar in the target/ directory, to start the replication process:
+	* with Java
 
-```
-    java -jar dynamodb-cross-region-replication-<current_version>.jar --sourceEndpoint <source_dynamodb_endpoint> --sourceTable <source_table_name> --destinationEndpoint <destination_dynamodb_endpoint> --destinationTable <destination_table_name>
-```
+		```
+			java -jar dynamodb-cross-region-replication-<current_version>.jar --sourceEndpoint <source_dynamodb_endpoint> --sourceTable <source_table_name> --destinationEndpoint <destination_dynamodb_endpoint> --destinationTable <destination_table_name>
+		```
+	* with Docker 
+		```
+			docker run --rm -ti awslabs/dynamodb-cross-region-replication:1.1.0 "java" "-jar" "/home/dynamodb-cross-region-replication-1.1.0.jar" --sourceEndpoint YOUR_ENDPOINT --sourceTable YOUR_TABLE --destinationEndpoint YOUR_ENDPOINT --destinationTable YOUR_TABLE
+		```
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
 * Sets up a [Kinesis Client Library (KCL)](https://github.com/awslabs/amazon-kinesis-client) worker to consume the DynamoDB Stream of the source table
