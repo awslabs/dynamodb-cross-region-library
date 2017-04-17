@@ -1,23 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <artifactId>dynamodb-cross-region-replication</artifactId>
     <packaging>jar</packaging>
     <name>DynamoDB Cross-region Replication</name>
     <description>
-                DynamoDB cross-region replication library is composed of various components that form a client-side library,  
+        The DynamoDB Cross-Region Replication library allows you to replicate DynamoDB tables in real-time with Streams.
     </description>
     <url>https://github.com/awslabs/dynamodb-cross-region-library</url>
     <scm>
-                <url>https://github.com/awslabs/dynamodb-cross-region-library.git</url>
+        <url>https://github.com/awslabs/dynamodb-cross-region-library.git</url>
     </scm>
 
     <properties>
-        <aws.java.sdk.version>1.10.77</aws.java.sdk.version>
-        <amazon.kinesis-client-library.version>1.3.0</amazon.kinesis-client-library.version>
-        <amazon.kinesis-connectors.version>1.2.0</amazon.kinesis-connectors.version>
-        <dynamodb-streams-kinesis-adapter.version>[1.0.0, 1.1.0)</dynamodb-streams-kinesis-adapter.version>
+        <aws.java.sdk.version>1.11.115</aws.java.sdk.version>
+        <aws.dynamodblocal.version>1.11.86</aws.dynamodblocal.version>
+        <amazon.kinesis-client-library.version>1.7.5</amazon.kinesis-client-library.version>
+        <amazon.kinesis-connectors.version>1.3.0</amazon.kinesis-connectors.version>
+        <dynamodb-streams-kinesis-adapter.version>1.2.0</dynamodb-streams-kinesis-adapter.version>
         <guava.version>18.0</guava.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
         <junit.version>4.12</junit.version>
@@ -28,6 +29,9 @@
         <maven.dependency.version>2.10</maven.dependency.version>
         <maven.resources.version>2.7</maven.resources.version>
         <maven.surefire.version>2.18.1</maven.surefire.version>
+        <download.maven.version>1.3.0</download.maven.version>
+        <maven.failsafe.version>2.19.1</maven.failsafe.version>
+        <dynamodb-local.port>4567</dynamodb-local.port>
         <exec.maven.plugin.version>1.4</exec.maven.plugin.version>
         <jcommander.version>1.48</jcommander.version>
         <log4j.version>1.2.17</log4j.version>
@@ -44,16 +48,16 @@
             <name>Daniela Miao</name>
             <email>dym@amazon.com</email>
         </developer>
+        <developer>
+            <name>Alexander Patrikalakis</name>
+            <email>amcp@me.com</email>
+            <url>https://www.linkedin.com/in/amcpatrix/en</url>
+        </developer>
     </developers>
     <contributors>
         <contributor>
             <name>Kenny Lei</name>
             <email>kennylei@amazon.com</email>
-        </contributor>
-        <contributor>
-            <name>Alexander Patrikalakis</name>
-            <email>alexp@amazon.com</email>
-            <url>https://www.linkedin.com/in/amcpatrix/en</url>
         </contributor>
     </contributors>
     <inceptionYear>2014</inceptionYear>
@@ -128,6 +132,11 @@
             <version>${guava.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -169,6 +178,9 @@
                     <includes>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/CrossRegionReplicationIntegrationTests.java</exclude>
+                    </excludes>
                     <systemPropertyVariables>
                         <log4j.configuration>file:${project.build.testOutputDirectory}/unitTestsLog4j.properties</log4j.configuration>
                     </systemPropertyVariables>
@@ -236,4 +248,87 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>${download.maven.version}</version>
+                        <executions>
+                            <execution>
+                                <id>install-dynamodb_local</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/dynamodb</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>com.bazaarvoice.maven.plugins</groupId>
+                        <artifactId>process-exec-maven-plugin</artifactId>
+                        <version>0.4</version>
+                        <executions>
+                            <execution>
+                                <id>dynamodb_local</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <name>dynamodb_local</name>
+                                    <waitAfterLaunch>1</waitAfterLaunch>
+                                    <arguments>
+                                        <argument>java</argument>
+                                        <argument>-Djava.library.path=dynamodb/DynamoDBLocal_lib</argument>
+                                        <argument>-jar</argument>
+                                        <argument>dynamodb/DynamoDBLocal.jar</argument>
+                                        <argument>-inMemory</argument>
+                                        <argument>-port</argument>
+                                        <argument>${dynamodb-local.port}</argument>
+                                        <argument>-sharedDb</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <!--Stop Process-->
+                            <execution>
+                                <id>stop-jar-process</id>
+                                <phase>post-integration-test</phase>
+                                <goals><goal>stop-all</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven.failsafe.version}</version>
+                        <executions>
+                            <execution>
+                                <id>default-integration-tests</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/CrossRegionReplicationIntegrationTests.java</include>
+                                    </includes>
+                                    <skip>false</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

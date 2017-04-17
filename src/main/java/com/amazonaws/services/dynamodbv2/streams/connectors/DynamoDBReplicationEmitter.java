@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.amazonaws.services.cloudwatch.model.PutMetricDataResult;
 import org.apache.log4j.Logger;
 
 import com.amazonaws.AmazonClientException;
@@ -408,9 +409,9 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
             return;
         }
         final PutMetricDataRequest request = new PutMetricDataRequest().withNamespace(applicationName).withMetricData(metrics);
-        cloudwatch.putMetricDataAsync(request, new AsyncHandler<PutMetricDataRequest, Void>() {
+        cloudwatch.putMetricDataAsync(request, new AsyncHandler<PutMetricDataRequest, PutMetricDataResult>() {
             @Override
-            public void onSuccess(PutMetricDataRequest request, Void result) {
+            public void onSuccess(PutMetricDataRequest request, PutMetricDataResult result) {
                 LOGGER.trace("Published metric: " + request);
             }
 

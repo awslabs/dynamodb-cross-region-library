@@ -43,7 +43,6 @@ public class DynamoDBConnectorConstants {
     /**
      * Prefixes, suffixes and limits
      */
-    public static final String TASKNAME_DELIMITER = "_";
     public static final String SERVICE_PREFIX = "DynamoDBCrossRegionReplication";
     public static final String STREAMS_PREFIX = "streams.";
     public static final String PROTOCOL_REGEX = "^(https?://)?(.+)";
@@ -54,8 +53,8 @@ public class DynamoDBConnectorConstants {
      */
     public static final int IDLE_TIME_BETWEEN_READS = 500;
     public static final int STREAMS_RECORDS_LIMIT = 1000;
-    public static final int KCL_RECORD_BUFFER_SIZE = 10 * STREAMS_RECORDS_LIMIT;
     public static final int KCL_FAILOVER_TIME = 60000;
+    public static final long DEFAULT_PARENT_SHARD_POLL_INTERVAL_MILLIS = 10000L;
     public static final String WORKER_LABEL = "worker";
 
     /**
