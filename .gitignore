@@ -1,5 +1,8 @@
+.classpath
 .project
 .settings
 .tmp
 target
 **/target
+/bin/
+*.log*
