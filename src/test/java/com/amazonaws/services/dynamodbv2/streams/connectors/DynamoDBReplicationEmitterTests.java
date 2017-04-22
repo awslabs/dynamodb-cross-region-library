@@ -20,8 +20,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.model.Record;
 import com.amazonaws.services.kinesis.connectors.interfaces.IEmitter;
 
@@ -31,6 +31,6 @@ import com.amazonaws.services.kinesis.connectors.interfaces.IEmitter;
 public class DynamoDBReplicationEmitterTests extends DynamoDBReplicationEmitterTestsBase {
     @Override
     protected IEmitter<Record> createEmitterInstance() {
-        return new DynamoDBReplicationEmitter("TEST", "ENDPOINT", "REGION", "TABLE", null, new StaticCredentialsProvider(new BasicAWSCredentials("Access", "Secret")));
+        return new DynamoDBReplicationEmitter("TEST", "ENDPOINT", "REGION", "TABLE", null, new AWSStaticCredentialsProvider(new BasicAWSCredentials("Access", "Secret")));
     }
 }

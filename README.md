@@ -1,4 +1,4 @@
-# DynamoDB Cross-region Replication
+# DynamoDB Cross-Region Replication
 
 The DynamoDB cross-region replication process consists of 2 distinct steps:
 
@@ -39,7 +39,7 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 2. This produces the target jar in the target/ directory, to start the replication process:
 
 ```
-    java -jar dynamodb-cross-region-replication-<current_version>.jar --sourceEndpoint <source_dynamodb_endpoint> --sourceTable <source_table_name> --destinationEndpoint <destination_dynamodb_endpoint> --destinationTable <destination_table_name>
+    java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
 ```
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
@@ -47,8 +47,9 @@ Use the `--help` option to view all available arguments to the connector executa
 * Uses a custom implementation of the [Kinesis Connector Library](https://github.com/awslabs/amazon-kinesis-connectors) to apply incoming stream records to the destination table in real-time
 * Creates a DynamoDB checkpoint table using the given or default `taskName`, used when restoring from crashes.
   * **WARNING**: Each replication process requires a different `taskName`. Overlapping names will result in strange, unpredictable behavior. Please also delete this DynamoDB checkpoint table if you wish to completely restart replication. See how a default `taskName` is calculated below in section "Advanced: running replication process across multiple machines".
-* Publishes default KCL CloudWatch metrics to report number of records and bytes processed. For more information please refer to the [official KCL documentation.](http://docs.aws.amazon.com/streams/latest/dev/monitoring-with-kcl.html)
+* Publishes default KCL CloudWatch metrics to report number of records and bytes processed. For more information please refer to the [official KCL documentation.](http://docs.aws.amazon.com/streams/latest/dev/monitoring-with-kcl.html). CloudWatch metric publishing can be disabled with the `--dontPublishCloudwatch` flag.
 * Produces logs locally according to the default log4j configuration file, which produces 2 separate log files: one for the KCL process and one for the rest of the connector application. You may use your own log4j.properties file to override these defaults. In addition, AWS CloudWatch offers a [monitoring agent](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchLogs.html) to automatically push local logs to your AWS CloudWatch account, if needed.
+* You can override the source, KCL and destination DynamoDB endpoints with `--sourceEndpoint`, and `--destinationEndpoint` command line arguments. You can override the DynamoDB Streams source endpoint with the `--sourceStreamsEndpoint` command line argument. The main use case for overriding any endpoint is to use DynamoDB Local on one end or both ends of the replication pipeline, or for KCL leases and checkpoints.
 
 > **NOTE**: More information on the design and internal structure of the connector library can be found in the [design doc.](./DESIGN.md) Please note it is your responsibility to ensure the connector process is up and running at all times - replication stops as soon as the process is killed, though upon resuming the process automatically uses the checkpoint table in DynamoDB to restore progress.
 
@@ -72,3 +73,6 @@ Each instantiation of the jar executable is for a single replication path only (
 
 **How can I ensure the process is always up and running?**
 * Use your own software tools to keep the process long-running. For instance, many people use [supervisord]( http://supervisord.org/). Others make use of other AWS services such as [EC2 Autoscaling](https://aws.amazon.com/autoscaling/) and [EC2 Container Service](https://aws.amazon.com/ecs/) to achieve the same purpose.
+
+**How can I build the library and run tests?**
+Execute `mvn clean verify -Pintegration-tests` on the command line. This will download DynamoDB Local and run an integration test against the local instance with CloudWatch metrics disabled.

@@ -19,7 +19,6 @@ package com.amazonaws.services.dynamodbv2.streams.connectors;
  */
 public class StatusCodes
 {
-    public static final int SUCCESS = 0;
     public static final int EIO = 5;
     public static final int EINVAL = 22;
 }

@@ -14,27 +14,20 @@
 package com.amazonaws.services.dynamodbv2.streams.connectors;
 
 import java.io.UnsupportedEncodingException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.log4j.Logger;
 
 import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
 import com.amazonaws.services.dynamodbv2.model.DescribeStreamRequest;
 import com.amazonaws.services.dynamodbv2.model.StreamDescription;
 import com.amazonaws.services.dynamodbv2.model.StreamViewType;
-import com.amazonaws.util.AwsHostNameUtils;
-import com.beust.jcommander.ParameterException;
+import com.google.common.base.Strings;
 
+import lombok.extern.log4j.Log4j;
+
+@Log4j
 public class DynamoDBConnectorUtilities {
-
-    /**
-     * Logger for the {@link DynamoDBConnectorUtilities} class.
-     */
-    private static final Logger LOGGER = Logger.getLogger(DynamoDBConnectorUtilities.class);
 
     /**
      * Get the taskname from command line arguments if it exists, if not, autogenerate one to be used by KCL in the
@@ -44,21 +37,24 @@ public class DynamoDBConnectorUtilities {
      *            region of the source table
      * @param destinationRegion
      *            region of the destination table
-     * @param params
-     *            command line arguments, use to check if there exists an user-specified task name
+     * @param suppliedTaskName
+     *            the user supplied task name
+     * @param sourceTableName
+     *            the source table name
+     * @param destinationTableName
+     *            the destination table name
      * @return the generated task name
-     * @throws UnsupportedEncodingException
      */
-    public static String getTaskName(Region sourceRegion, Region destinationRegion, CommandLineArgs params)
-        throws UnsupportedEncodingException {
+    public static String getTaskName(Region sourceRegion, Region destinationRegion, String suppliedTaskName,
+                                     String sourceTableName, String destinationTableName) {
         String taskName;
-        if (params.getTaskName() != null) {
-            taskName = DynamoDBConnectorConstants.SERVICE_PREFIX + params.getTaskName();
+        if (!Strings.isNullOrEmpty(suppliedTaskName)) {
+            taskName = DynamoDBConnectorConstants.SERVICE_PREFIX + suppliedTaskName;
             if (taskName.length() > DynamoDBConnectorConstants.DYNAMODB_TABLENAME_LIMIT) {
-                throw new ParameterException("Provided taskname is too long!");
+                throw new IllegalArgumentException("Provided taskname is too long!");
             }
         } else {
-            taskName = sourceRegion + params.getSourceTable() + destinationRegion + params.getDestinationTable();
+            taskName = sourceRegion.getName() + sourceTableName + destinationRegion.getName() + destinationTableName;
             // hash stack name using MD5
             if (DynamoDBConnectorConstants.MD5_DIGEST == null) {
                 // see if we can generate a taskname without hashing
@@ -67,54 +63,17 @@ public class DynamoDBConnectorUtilities {
                         "Generated taskname is too long and cannot be hashed due to improperly initialized MD5 digest object!");
                 }
             } else {
-                taskName = DynamoDBConnectorConstants.SERVICE_PREFIX
-                    + new String(Hex.encodeHex(DynamoDBConnectorConstants.MD5_DIGEST.digest(taskName
-                        .getBytes(DynamoDBConnectorConstants.BYTE_ENCODING))));
+                try {
+                    taskName = DynamoDBConnectorConstants.SERVICE_PREFIX
+                            + new String(Hex.encodeHex(DynamoDBConnectorConstants.MD5_DIGEST.digest(taskName
+                            .getBytes(DynamoDBConnectorConstants.BYTE_ENCODING))));
+                } catch (UnsupportedEncodingException e) {
+                    throw new IllegalArgumentException("taskName was not encoded as " + DynamoDBConnectorConstants.BYTE_ENCODING, e);
+                }
             }
         }
 
         return taskName;
-    }
-
-    /**
-     * Convert a given endpoint into its corresponding region
-     *
-     * @param endpoint
-     *            given endpoint URL
-     * @return the extracted region corresponding to the given endpoint
-     */
-    public static Region getRegionFromEndpoint(String endpoint) {
-        return Region.getRegion(Regions.fromName(AwsHostNameUtils.parseRegionName(endpoint, null)));
-    }
-
-    /**
-     * Convert a given DynamoDB endpoint into its corresponding Streams endpoint
-     *
-     * @param endpoint
-     *            given endpoint URL
-     * @return the extracted Streams endpoint corresponding to the given DynamoDB endpoint
-     */
-    public static String getStreamsEndpoint(String endpoint) {
-        String regex = DynamoDBConnectorConstants.PROTOCOL_REGEX;
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(endpoint);
-        String ret;
-        if (matcher.matches()) {
-            ret = ((matcher.group(1) == null) ? "" : matcher.group(1)) + DynamoDBConnectorConstants.STREAMS_PREFIX
-                + matcher.group(2);
-        } else {
-            ret = DynamoDBConnectorConstants.STREAMS_PREFIX + endpoint;
-        }
-        return ret;
-    }
-
-    /**
-     * Get the current region according to the metadata on the instance
-     * 
-     * @return current region, or US-EAST-1 if no metadata exists
-     */
-    public static Region getCurRegion() {
-        return Regions.getCurrentRegion() == null ? Region.getRegion(Regions.US_EAST_1) : Regions.getCurrentRegion();
     }
 
     /**
@@ -129,7 +88,7 @@ public class DynamoDBConnectorUtilities {
      * @return a boolean indicating whether the given stream is enabled and matches the given stream view type
      */
     public static boolean isStreamsEnabled(AmazonDynamoDBStreams streamsClient, String streamArn,
-        StreamViewType viewType) {
+                                           StreamViewType viewType) {
         // Get and check stream description
         StreamDescription result = streamsClient.describeStream(new DescribeStreamRequest().withStreamArn(streamArn))
             .getStreamDescription();
@@ -137,7 +96,7 @@ public class DynamoDBConnectorUtilities {
             && result.getStreamViewType().equalsIgnoreCase(viewType.toString())) {
             return true;
         }
-        LOGGER.error(DynamoDBConnectorConstants.STREAM_NOT_READY + " StreamARN: " + streamArn);
+        log.error(DynamoDBConnectorConstants.STREAM_NOT_READY + " StreamARN: " + streamArn);
         return false;
     }
 }

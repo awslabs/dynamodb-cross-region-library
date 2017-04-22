@@ -106,6 +106,7 @@ public abstract class DynamoDBReplicationEmitterTestsBase {
         return SEQ_NUM_PRE + seqNum;
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void insertTest() throws Exception {
         // Set up the buffer and do sanity checks
@@ -131,6 +132,7 @@ public abstract class DynamoDBReplicationEmitterTestsBase {
         verifyAll();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void modifyTest() throws Exception {
         // Set up the buffer and do sanity checks
@@ -155,6 +157,7 @@ public abstract class DynamoDBReplicationEmitterTestsBase {
         verifyAll();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void removeTest() throws Exception {
         // Set up the buffer and do sanity checks
@@ -179,6 +182,7 @@ public abstract class DynamoDBReplicationEmitterTestsBase {
         verifyAll();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void multipleRecordsEmitsTest() throws Exception {
         // Set up the buffer and do sanity checks

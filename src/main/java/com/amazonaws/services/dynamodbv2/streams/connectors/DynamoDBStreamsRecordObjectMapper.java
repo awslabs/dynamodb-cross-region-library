@@ -27,12 +27,9 @@ public class DynamoDBStreamsRecordObjectMapper {
     /*
      * Singleton instance of the mapper
      */
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    static {
-        MAPPER.addMixInAnnotations(com.amazonaws.services.dynamodbv2.model.Record.class, IgnoreSetEventNameMixIn.class);
-        MAPPER.addMixInAnnotations(com.amazonaws.services.dynamodbv2.model.StreamRecord.class, IgnoreSetStreamViewTypeMixIn.class);
-    }
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .addMixIn(com.amazonaws.services.dynamodbv2.model.Record.class, IgnoreSetEventNameMixIn.class)
+            .addMixIn(com.amazonaws.services.dynamodbv2.model.StreamRecord.class, IgnoreSetStreamViewTypeMixIn.class);
 
     /**
      * Getter for private ObjectMapper instance
