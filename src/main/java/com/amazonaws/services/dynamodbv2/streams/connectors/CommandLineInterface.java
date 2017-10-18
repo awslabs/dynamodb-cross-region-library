@@ -1,13 +1,13 @@
 /*
  * Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Amazon Software License (the "License"). You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  * http://aws.amazon.com/asl/
- * 
+ *
  * or in the "LICENSE.txt" file accompanying this file.
- * 
+ *
  * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
@@ -109,6 +109,7 @@ public class CommandLineInterface {
     private final String taskName;
     private final String destinationTable;
     private final Optional<Long> parentShardPollIntervalMillis;
+    private final Optional<String> replicatedFlag;
 
     @VisibleForTesting
     CommandLineInterface(CommandLineArgs params) throws ParameterException {
@@ -131,6 +132,7 @@ public class CommandLineInterface {
         destinationRegion = RegionUtils.getRegion(params.getDestinationSigningRegion());
         destinationDynamodbEndpoint = Optional.fromNullable(params.getDestinationEndpoint());
         destinationTable = params.getDestinationTable();
+        replicatedFlag = Optional.fromNullable(params.getReplicatedFlag());
 
         // other crr parameters
         getRecordsLimit = Optional.fromNullable(params.getBatchSize());
@@ -201,6 +203,9 @@ public class CommandLineInterface {
         properties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_ENDPOINT, destinationEndpointConfiguration.getServiceEndpoint());
         properties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_DATA_TABLE_NAME, destinationTable);
         properties.put(DynamoDBStreamsConnectorConfiguration.PROP_REGION_NAME, destinationRegion.getName());
+        if (replicatedFlag.isPresent()) {
+            properties.put(CommandLineArgs.REPLICATED_FLAG, replicatedFlag.get());
+        }
 
         // create the record processor factory based on given pipeline and connector configurations
         // use the master to replicas pipeline
