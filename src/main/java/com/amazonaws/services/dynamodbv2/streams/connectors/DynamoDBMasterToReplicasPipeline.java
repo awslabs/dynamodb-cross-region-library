@@ -22,8 +22,6 @@ import com.amazonaws.services.kinesis.connectors.interfaces.IFilter;
 import com.amazonaws.services.kinesis.connectors.interfaces.IKinesisConnectorPipeline;
 import com.amazonaws.services.kinesis.connectors.interfaces.ITransformer;
 
-import java.util.Map;
-
 /**
  * The Pipeline used when there is only one single master replicating to multiple replicas. Uses:
  * <ul>
