@@ -15,7 +15,6 @@ package com.amazonaws.services.dynamodbv2.streams.connectors;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
