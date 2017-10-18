@@ -41,7 +41,6 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 ```
     java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
 ```
-Usage of --replicatedFlagAttribute option is discussed later.
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
 * Sets up a [Kinesis Client Library (KCL)](https://github.com/awslabs/amazon-kinesis-client) worker to consume the DynamoDB Stream of the source table
@@ -53,6 +52,11 @@ Use the `--help` option to view all available arguments to the connector executa
 * You can override the source, KCL and destination DynamoDB endpoints with `--sourceEndpoint`, and `--destinationEndpoint` command line arguments. You can override the DynamoDB Streams source endpoint with the `--sourceStreamsEndpoint` command line argument. The main use case for overriding any endpoint is to use DynamoDB Local on one end or both ends of the replication pipeline, or for KCL leases and checkpoints.
 
 > **NOTE**: More information on the design and internal structure of the connector library can be found in the [design doc.](./DESIGN.md) Please note it is your responsibility to ensure the connector process is up and running at all times - replication stops as soon as the process is killed, though upon resuming the process automatically uses the checkpoint table in DynamoDB to restore progress.
+
+# Two way (Master-Master) replication between 2 tables
+The library supports replicating realtime records between 2 tables in both ways. This means the data in both tables will be in sync thanks to this feature. This comes in handy when the business requirement
+is to keep a table synchronized across different regions (Data centers) while receiving updates at any of the region. This is handled through the usage of `--replicatedFlagAttribute` option and is discussed later
+under different replication scenarios.
 
 ## Advanced: running replication process across multiple machines
 
@@ -69,18 +73,18 @@ Each instantiation of the jar executable is for a single replication path only (
 **Replication Scenario 2**: Two source tables (table1 & table2) in us-east-1, both replicated separately to us-west-2
 * Number of Processes Required: 2 cross-region replication processes required: one for table1 from us-east-1 to us-west-2, and one for table2 from us-east-1 to us-west-2
 
-**Replication Scenario 3**: Perform a both way replication between 2 tables. Here we have table1 which need to be replicated to table2 and vice-versa. This can be achived by using the --replicatedFlagAttribute option when starting the application.
+**Replication Scenario 3**: Perform a both way replication between 2 tables. Here we have table1 which needs to be replicated to table2 and vice-versa. This can be achived by using the `--replicatedFlagAttribute` option when starting the application.
 This option will create a flag attribute in the destination table indicating that the record has been created through replication process. How it works:
-* Records coming from table1 will be appended with the flag and inserted/updated to table2 having this attribute set as 'true' (boolean).
-* The replication triggered from  table2 due the insertion from previous step will carry this flag and the replication system will ignore it because its replicated preventing duplicate updates to source table.
-* Similarly new records from table2 when saved to table1 will have this flag set.
+* Records coming from table1 will be appended with the flag and inserted/updated to table2 having this attribute set as `true` (boolean).
+* The replication triggered from  table2 due the insertion from previous step will carry this flag and the replication system will ignore it because its replicated preventing duplicate updates to source table1.
+* Similarly new records from table2 when saved to table1 by replication will have this flag set.
 * Please note that when any updates are made to the replicated records in the destination tables through client application, the value of the flag attribute must be set to 'false' or removed totally from the item in order for such changes to
   propagate to the other participating table. Usage given below:
   ```
       java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name> --replicatedFlagAttribute <attribute_name>
   ```
-  The attribute_name can be any value as defined [here](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html). --replicatedFlagAttribute is optional and should be used
-  only for two way (master-master) replication.
+  The `attribute_name` can be any value as defined [here](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html). `--replicatedFlagAttribute` is optional and should be used
+  only for two way (master-master) replication between 2 tables.
 
 **Can multiple cross-region replication processes run on the same machine?**
 * Yes, feel free to launch multiple processes on the same machine to optimize resource usage. However, it is highly recommended that you monitor one process first to understand its CPU, memory, network and other resource footprint. In general, bigger tables require more resources and high-throughput tables require more resources.

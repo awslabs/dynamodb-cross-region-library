@@ -33,7 +33,7 @@ import java.util.Map;
  * <li>{@link DynamoDBReplicationEmitter}</li>
  * <li>{@link DynamoDBBuffer}</li>
  * <li>{@link DynamoDBStreamsRecordTransformer}</li>
- * <li>{@link AllPassFilter}</li>
+ * <li>{@link ReplicatedRecordFilter}</li>
  * </ul>
  */
 
@@ -65,33 +65,8 @@ public class DynamoDBMasterToReplicasPipeline implements IKinesisConnectorPipeli
 
     @Override
     public IFilter<Record> getFilter(final KinesisConnectorConfiguration configuration) {
-        //return new AllPassFilter<Record>();
-        return new IFilter<Record>() {
-            @Override
-            public boolean keepRecord(Record record) {
-                DynamoDBStreamsConnectorConfiguration config = (DynamoDBStreamsConnectorConfiguration) configuration;
-
-                if (isNotBlank(config.REPLICATED_FLAG)){
-                    Map<String, AttributeValue> image = null;
-                    if (record.getDynamodb() != null) {
-                        image = record.getDynamodb().getNewImage();
-                    }
-                    if (image != null) {
-                        AttributeValue flagValue = image.get(config.REPLICATED_FLAG);
-                        if (flagValue == null) {
-                            image.put(config.REPLICATED_FLAG, new AttributeValue().withBOOL(true));
-                            return true;
-                        } else {
-                            Boolean flag = flagValue.getBOOL();
-                            if (flag !=null && flag) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-                return true;
-            }
-        };
+        // configuration must be a DynamoDBStreamsConnectorConfiguration.
+        return new ReplicatedRecordFilter((DynamoDBStreamsConnectorConfiguration) configuration);
     }
 
 }
