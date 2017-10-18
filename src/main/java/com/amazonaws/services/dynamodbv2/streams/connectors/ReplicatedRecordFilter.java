@@ -43,6 +43,9 @@ public class ReplicatedRecordFilter implements IFilter<Record> {
                     if (flag !=null && flag) {
                         log.debug("Filtering out record, Event Id: " + record.getEventID());
                         return false;
+                    } else {
+                        image.put(replicatedAttibute, new AttributeValue().withBOOL(true));
+                        return true;
                     }
                 }
             }
