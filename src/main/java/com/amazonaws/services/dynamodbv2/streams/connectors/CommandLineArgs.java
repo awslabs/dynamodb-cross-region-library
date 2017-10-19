@@ -82,6 +82,6 @@ public class CommandLineArgs {
 
     public static final String REPLICATED_FLAG = "--replicatedFlagAttribute";
     @Parameter(names = REPLICATED_FLAG,
-            description = "Table attibute that will indicate if a record is original or replicated. To be used in Master-Master replication", hidden = true)
+            description = "Table attibute that will indicate if a record is original or replicated. To be used in Master-Master replication")
     private String replicatedFlag;
 }
