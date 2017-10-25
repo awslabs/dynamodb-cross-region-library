@@ -39,7 +39,7 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 2. This produces the target jar in the target/ directory, to start the replication process:
 
 ```
-    java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
+    java -jar target/dynamodb-cross-region-replication-1.3.0.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
 ```
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
@@ -81,7 +81,7 @@ This option will create a flag attribute in the destination table indicating tha
 * Please note that when any updates are made to the replicated records in the destination tables through client application, the value of the flag attribute must be set to 'false' or removed totally from the item in order for such changes to
   propagate to the other participating table. Usage given below:
   ```
-      java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name> --replicatedFlagAttribute <attribute_name>
+      java -jar target/dynamodb-cross-region-replication-1.3.0.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name> --replicatedFlagAttribute <attribute_name>
   ```
   The `attribute_name` can be any value as defined [here](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html). `--replicatedFlagAttribute` is optional and should be used
   only for two way (master-master) replication between 2 tables.
