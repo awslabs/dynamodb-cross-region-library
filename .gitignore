@@ -1,5 +1,8 @@
 .project
+.classpath
+.idea
 .settings
 .tmp
 target
 **/target
+**/out

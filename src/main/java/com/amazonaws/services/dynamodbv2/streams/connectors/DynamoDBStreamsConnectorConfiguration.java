@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
  * properties and an AWSCredentialsProvider.
  */
 public class DynamoDBStreamsConnectorConfiguration extends KinesisConnectorConfiguration {
-
+    public final String REPLICATED_FLAG;
     /**
      * Default cross region replication map of region to tables, containing a single default region and single default
      * test table.
@@ -45,8 +45,12 @@ public class DynamoDBStreamsConnectorConfiguration extends KinesisConnectorConfi
      *            The AWS credentialsProvider
      */
     public DynamoDBStreamsConnectorConfiguration(final Properties properties,
-        final AWSCredentialsProvider credentialsProvider) {
+                                                 final AWSCredentialsProvider credentialsProvider) {
         super(properties, credentialsProvider);
-
+        if (properties.get(CommandLineArgs.REPLICATED_FLAG) != null) {
+            this.REPLICATED_FLAG = (String) properties.get(CommandLineArgs.REPLICATED_FLAG);
+        } else {
+            this.REPLICATED_FLAG = null;
+        }
     }
 }
