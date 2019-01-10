@@ -2,6 +2,11 @@
 
 This document summarizes the changes in each release of the DynamoDB Cross-Region Replication library.
 
+## 1.4.0
+- Updates dependency on DynamoDB Streams Kinesis Adapter to 1.4.0.
+- Updates dependency on KCL to 1.9.0.
+- Updates dependency on Amazon Kinesis Connectors to 1.4.0 (in amcp@'s fork for now)
+
 ## 1.2.1
 Updates dependency on DynamoDB Streams Kinesis Adapter to 1.2.1.
 

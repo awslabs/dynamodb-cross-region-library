@@ -39,7 +39,7 @@ This step sets up a replication process that continuously consumes DynamoDB stre
 2. This produces the target jar in the target/ directory, to start the replication process:
 
 ```
-    java -jar target/dynamodb-cross-region-replication-1.2.1.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
+    java -jar target/dynamodb-cross-region-replication-1.4.0.jar --sourceRegion <source_region> --sourceTable <source_table_name> --destinationRegion <destination_region> --destinationTable <destination_table_name>
 ```
 
 Use the `--help` option to view all available arguments to the connector executable jar. The connector process accomplishes a few things:
