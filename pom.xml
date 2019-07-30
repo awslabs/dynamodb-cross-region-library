@@ -63,8 +63,8 @@
     <inceptionYear>2014</inceptionYear>
     <licenses>
         <license>
-            <name>Amazon Software License</name>
-            <url>http://aws.amazon.com/asl/</url>
+            <name>Apache License, version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
