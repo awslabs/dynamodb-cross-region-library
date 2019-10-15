@@ -1,3 +1,5 @@
+**_[IMPORTANT]_ Dynamodb now provides server-side support for cross-region replication using Global Tables. Please use that instead of this client-side library. For more details about Global Tables, please see https://aws.amazon.com/dynamodb/global-tables/**
+
 # DynamoDB Cross-Region Replication
 
 The DynamoDB cross-region replication process consists of 2 distinct steps:
