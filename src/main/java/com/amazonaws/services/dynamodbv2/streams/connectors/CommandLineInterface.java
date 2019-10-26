@@ -11,6 +11,7 @@ import java.util.UUID;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.regions.Region;
@@ -27,6 +28,8 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionIn
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 import com.amazonaws.services.kinesis.connectors.KinesisConnectorRecordProcessorFactory;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.common.annotations.VisibleForTesting;
@@ -91,11 +94,14 @@ public class CommandLineInterface {
     private final Region sourceRegion;
     private final Optional<String> sourceDynamodbEndpoint;
     private final Optional<String> sourceDynamodbStreamsEndpoint;
+    private final Optional<String> sourceRoleArn;
     private final String sourceTable;
     private final Optional<Region> kclRegion;
     private final Optional<String> kclDynamodbEndpoint;
+    private final Optional<String> kclRoleArn;
     private final Region destinationRegion;
     private final Optional<String> destinationDynamodbEndpoint;
+    private final Optional<String> destinationRoleArn;
     private final Optional<Integer> getRecordsLimit;
     private final boolean isPublishCloudWatch;
     private final String taskName;
@@ -111,6 +117,7 @@ public class CommandLineInterface {
         // set the source dynamodb endpoint
         sourceDynamodbEndpoint = Optional.fromNullable(params.getSourceEndpoint());
         sourceDynamodbStreamsEndpoint = Optional.fromNullable(params.getSourceEndpoint());
+        sourceRoleArn = Optional.fromNullable(params.getSourceRoleArn());
 
         // get source table name
         sourceTable = params.getSourceTable();
@@ -118,10 +125,12 @@ public class CommandLineInterface {
         // get kcl endpoint and region or null for region if cannot parse region from endpoint
         kclRegion = Optional.fromNullable(RegionUtils.getRegion(params.getKclSigningRegion()));
         kclDynamodbEndpoint = Optional.fromNullable(params.getKclEndpoint());
+        kclRoleArn = Optional.fromNullable(params.getKclRoleArn());
 
         // get destination endpoint and region or null for region if cannot parse region from endpoint
         destinationRegion = RegionUtils.getRegion(params.getDestinationSigningRegion());
         destinationDynamodbEndpoint = Optional.fromNullable(params.getDestinationEndpoint());
+        destinationRoleArn = Optional.fromNullable(params.getDestinationRoleArn());
         destinationTable = params.getDestinationTable();
 
         // other crr parameters
@@ -138,12 +147,22 @@ public class CommandLineInterface {
 
     public Worker createWorker() {
 
-        // use default credential provider chain to locate appropriate credentials
-        final AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
+        // try to get taskname from command line arguments, auto generate one if needed
+        final AwsClientBuilder.EndpointConfiguration destinationEndpointConfiguration = createEndpointConfiguration(destinationRegion,
+                destinationDynamodbEndpoint, AmazonDynamoDB.ENDPOINT_PREFIX);
+        final String actualTaskName = DynamoDBConnectorUtilities.getTaskName(sourceRegion, destinationRegion, taskName, sourceTable, destinationTable);
+
+        // generate the KCL worker id
+        final String kclWorkerId = DynamoDBConnectorConstants.WORKER_LABEL + actualTaskName + UUID.randomUUID().toString();
+
+        // use default credential provider chain to locate appropriate credentials if role to assume for source table is not present
+        final AWSCredentialsProvider sourceTableCredentialsProvider = sourceRoleArn.isPresent()
+                ? new STSAssumeRoleSessionCredentialsProvider.Builder(sourceRoleArn.get(), kclWorkerId).build()
+                : new DefaultAWSCredentialsProviderChain();
 
         // initialize DynamoDB client and set the endpoint properly for source table / region
         final AmazonDynamoDB dynamodbClient = AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(credentialsProvider)
+                .withCredentials(sourceTableCredentialsProvider)
                 .withEndpointConfiguration(createEndpointConfiguration(sourceRegion, sourceDynamodbEndpoint, AmazonDynamoDB.ENDPOINT_PREFIX))
                 .build();
 
@@ -152,7 +171,7 @@ public class CommandLineInterface {
                 sourceDynamodbStreamsEndpoint, AmazonDynamoDBStreams.ENDPOINT_PREFIX);
         final ClientConfiguration streamsClientConfig = new ClientConfiguration().withGzip(false);
         final AmazonDynamoDBStreams streamsClient = AmazonDynamoDBStreamsClientBuilder.standard()
-                .withCredentials(credentialsProvider)
+                .withCredentials(sourceTableCredentialsProvider)
                 .withEndpointConfiguration(streamsEndpointConfiguration)
                 .withClientConfiguration(streamsClientConfig)
                 .build();
@@ -163,9 +182,14 @@ public class CommandLineInterface {
         Preconditions.checkArgument(streamArn != null, DynamoDBConnectorConstants.MSG_NO_STREAMS_FOUND);
         Preconditions.checkState(streamEnabled, DynamoDBConnectorConstants.STREAM_NOT_READY);
 
+        // use default credential provider chain to locate appropriate credentials if role to assume for kcl is not present
+        final AWSCredentialsProvider kclCredentialsProvider = kclRoleArn.isPresent()
+                ? new STSAssumeRoleSessionCredentialsProvider.Builder(kclRoleArn.get(), kclWorkerId).build()
+                : new DefaultAWSCredentialsProviderChain();
+
         // initialize DynamoDB client for KCL
         final AmazonDynamoDB kclDynamoDBClient = AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(credentialsProvider)
+                .withCredentials(kclCredentialsProvider)
                 .withEndpointConfiguration(createKclDynamoDbEndpointConfiguration())
                 .build();
 
@@ -176,34 +200,34 @@ public class CommandLineInterface {
         final AmazonCloudWatch kclCloudWatchClient;
         if (isPublishCloudWatch) {
             kclCloudWatchClient = AmazonCloudWatchClientBuilder.standard()
-                    .withCredentials(credentialsProvider)
+                    .withCredentials(kclCredentialsProvider)
                     .withRegion(kclRegion.or(sourceRegion).getName()).build();
         } else {
             kclCloudWatchClient = new NoopCloudWatch();
         }
 
-        // try to get taskname from command line arguments, auto generate one if needed
-        final AwsClientBuilder.EndpointConfiguration destinationEndpointConfiguration = createEndpointConfiguration(destinationRegion,
-                destinationDynamodbEndpoint, AmazonDynamoDB.ENDPOINT_PREFIX);
-        final String actualTaskName = DynamoDBConnectorUtilities.getTaskName(sourceRegion, destinationRegion, taskName, sourceTable, destinationTable);
+        // use default credential provider chain to locate appropriate credentials if role to assume for kcl is not present
+        final AWSCredentialsProvider destinationTableCredentialsProvider = destinationRoleArn.isPresent()
+                ? new STSAssumeRoleSessionCredentialsProvider.Builder(destinationRoleArn.get(), kclWorkerId).build()
+                : new DefaultAWSCredentialsProviderChain();
 
         // set the appropriate Connector properties for the destination KCL configuration
-        final Properties properties = new Properties();
-        properties.put(DynamoDBStreamsConnectorConfiguration.PROP_APP_NAME, actualTaskName);
-        properties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_ENDPOINT, destinationEndpointConfiguration.getServiceEndpoint());
-        properties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_DATA_TABLE_NAME, destinationTable);
-        properties.put(DynamoDBStreamsConnectorConfiguration.PROP_REGION_NAME, destinationRegion.getName());
+        final Properties destinationTableProperties = new Properties();
+        destinationTableProperties.put(DynamoDBStreamsConnectorConfiguration.PROP_APP_NAME, actualTaskName);
+        destinationTableProperties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_ENDPOINT, destinationEndpointConfiguration.getServiceEndpoint());
+        destinationTableProperties.put(DynamoDBStreamsConnectorConfiguration.PROP_DYNAMODB_DATA_TABLE_NAME, destinationTable);
+        destinationTableProperties.put(DynamoDBStreamsConnectorConfiguration.PROP_REGION_NAME, destinationRegion.getName());
 
         // create the record processor factory based on given pipeline and connector configurations
         // use the master to replicas pipeline
         final KinesisConnectorRecordProcessorFactory<Record, Record> factory = new KinesisConnectorRecordProcessorFactory<>(
-                new DynamoDBMasterToReplicasPipeline(), new DynamoDBStreamsConnectorConfiguration(properties, credentialsProvider));
+                new DynamoDBMasterToReplicasPipeline(), new DynamoDBStreamsConnectorConfiguration(destinationTableProperties, destinationTableCredentialsProvider));
 
         // create the KCL configuration with default values
         final KinesisClientLibConfiguration kclConfig = new KinesisClientLibConfiguration(actualTaskName,
                 streamArn,
-                credentialsProvider,
-                DynamoDBConnectorConstants.WORKER_LABEL + actualTaskName + UUID.randomUUID().toString())
+                kclCredentialsProvider,
+                kclWorkerId)
                 // worker will use checkpoint table if available, otherwise it is safer
                 // to start at beginning of the stream
                 .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON)

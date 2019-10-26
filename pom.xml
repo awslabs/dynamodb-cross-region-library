@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.amazonaws</groupId>
-    <version>1.2.1</version>
+    <version>1.4.0</version>
     <artifactId>dynamodb-cross-region-replication</artifactId>
     <packaging>jar</packaging>
     <name>DynamoDB Cross-region Replication</name>
@@ -16,14 +16,14 @@
     <properties>
         <aws.java.sdk.version>1.11.115</aws.java.sdk.version>
         <aws.dynamodblocal.version>1.11.86</aws.dynamodblocal.version>
-        <amazon.kinesis-client-library.version>1.7.5</amazon.kinesis-client-library.version>
-        <amazon.kinesis-connectors.version>1.3.0</amazon.kinesis-connectors.version>
-        <dynamodb-streams-kinesis-adapter.version>1.2.1</dynamodb-streams-kinesis-adapter.version>
+        <amazon.kinesis-client-library.version>1.9.0</amazon.kinesis-client-library.version>
+        <amazon.kinesis-connectors.version>1.4.0</amazon.kinesis-connectors.version>
+        <dynamodb-streams-kinesis-adapter.version>1.4.0</dynamodb-streams-kinesis-adapter.version>
         <guava.version>18.0</guava.version>
-        <commons-lang3.version>3.3.2</commons-lang3.version>
+        <commons-lang3.version>3.7</commons-lang3.version>
         <junit.version>4.12</junit.version>
-        <easymock.version>3.2</easymock.version>
-        <powermock.version>1.6.2</powermock.version>
+        <easymock.version>4.0.1</easymock.version>
+        <powermock.version>2.0.0</powermock.version>
         <maven.assembly.version>2.5.3</maven.assembly.version>
         <maven.compiler.version>3.3</maven.compiler.version>
         <maven.dependency.version>2.10</maven.dependency.version>
@@ -37,6 +37,7 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.shade.version>2.4.1</maven.shade.version>
         <java.jdk.version>1.7</java.jdk.version>
+        <maven.enforcer.plugin.version>3.0.0-M2</maven.enforcer.plugin.version>
     </properties>
 
     <developers>
@@ -79,6 +80,11 @@
           <type>pom</type>
           <scope>import</scope>
         </dependency>
+        <dependency>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+          <version>1.2</version>
+        </dependency>
       </dependencies>
     </dependencyManagement>
 
@@ -100,6 +106,10 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-logs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sts</artifactId>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -161,6 +171,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -170,6 +181,24 @@
                     <target>${java.jdk.version}</target>
                 </configuration>
                 <version>${maven.compiler.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven.enforcer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <configuration>
+                            <rules>
+                                <dependencyConvergence/>
+                            </rules>
+                        </configuration>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>

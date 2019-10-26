@@ -15,6 +15,7 @@ public class CommandLineArgs {
     @Parameter(names = HELP, description = "Display usage information", help = true)
     private boolean help;
 
+    //need the source table endpoint to describe the table and get the latest stream id
     public static final String SOURCE_SIGNING_REGION = "--sourceRegion";
     @Parameter(names = SOURCE_SIGNING_REGION, required = true, description =
             "Signing region to use for the DynamoDB endpoint containing the source table")
@@ -32,6 +33,10 @@ public class CommandLineArgs {
     @Parameter(names = SOURCE_TABLE, description = "Name of the source table", required = true)
     private String sourceTable;
 
+    public static final String SOURCE_ROLE = "--sourceRole";
+    @Parameter(names = SOURCE_ROLE, description = "IAM role to assume for describing the source table and reading the source table's stream")
+    private String sourceRoleArn;
+
     public static final String KCL_SIGNING_REGION = "--kclRegion";
     @Parameter(names = KCL_SIGNING_REGION, description =
             "Signing region to use for the DynamoDB endpoint containing the KCL table")
@@ -40,6 +45,10 @@ public class CommandLineArgs {
     public static final String KCL_ENDPOINT = "--kclEndpoint";
     @Parameter(names = KCL_ENDPOINT, description = "DynamoDB endpoint for KCL to use")
     private String kclEndpoint;
+
+    public static final String KCL_ROLE = "--kclRole";
+    @Parameter(names = KCL_ROLE, description = "IAM role to assume for writing KCL checkpoints to a DynamoDB table and emitting KCL metrics to CloudWatch")
+    private String kclRoleArn;
 
     public static final String TASK_NAME = "--taskName";
     @Parameter(names = TASK_NAME, description = "Name of task, used to name DynamoDB checkpoint table and identify metrics in CloudWatch")
@@ -57,6 +66,10 @@ public class CommandLineArgs {
     public static final String DESTINATION_TABLE = "--destinationTable";
     @Parameter(names = DESTINATION_TABLE, description = "Name of the destination table", required = true)
     private String destinationTable;
+
+    public static final String DESTINATION_ROLE = "--destinationRole";
+    @Parameter(names = DESTINATION_ROLE, description = "IAM role to assume for writing replicated records to the destination table")
+    private String destinationRoleArn;
 
     public static final String DONT_PUBLISH_CLOUDWATCH = "--dontPublishCloudwatch";
     @Parameter(names = DONT_PUBLISH_CLOUDWATCH, description = "Have KCL not publish Cloudwatch metrics", hidden = true)
