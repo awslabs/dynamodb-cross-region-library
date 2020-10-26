@@ -21,7 +21,7 @@
         <dynamodb-streams-kinesis-adapter.version>1.2.1</dynamodb-streams-kinesis-adapter.version>
         <guava.version>18.0</guava.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <easymock.version>3.2</easymock.version>
         <powermock.version>1.6.2</powermock.version>
         <maven.assembly.version>2.5.3</maven.assembly.version>
