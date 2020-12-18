@@ -81,11 +81,11 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
     /**
      * AmazonCloudWatch for emitting metrics.
      */
-    private static final AtomicReference<AmazonCloudWatchAsync> CLOUDWATCH = new AtomicReference<AmazonCloudWatchAsync>();
+    private final AmazonCloudWatchAsync cloudWatch;
     /**
      * Asynchronous DynamoDB client for writing to the DynamoDB table.
      */
-    private static final AtomicReference<AmazonDynamoDBAsync> DYNAMODB = new AtomicReference<AmazonDynamoDBAsync>();
+    private final AmazonDynamoDBAsync dynamodDb;
     /**
      * Maximum number of threads for the Async clients.
      */
@@ -185,15 +185,13 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
         this.endpoint = endpoint;
         this.region = region;
         this.tableName = tableName;
+        this.dynamodDb = dynamoDBAsync;
+        this.dynamodDb.setEndpoint(endpoint);
+        this.cloudWatch = cloudwatch;
+        if (this.cloudWatch != null) {
+            this.cloudWatch.setRegion(Regions.getCurrentRegion() == null ? Region.getRegion(Regions.US_EAST_1) : Regions.getCurrentRegion());
+        }
 
-        final boolean setDynamoDB = DYNAMODB.compareAndSet(null, dynamoDBAsync);
-        if (setDynamoDB && dynamoDBAsync != null) {
-            DYNAMODB.get().setEndpoint(endpoint);
-        }
-        final boolean setCloudWatch = CLOUDWATCH.compareAndSet(null, cloudwatch);
-        if (setCloudWatch && cloudwatch != null) {
-            CLOUDWATCH.get().setRegion(Regions.getCurrentRegion() == null ? Region.getRegion(Regions.US_EAST_1) : Regions.getCurrentRegion());
-        }
         skipErrors = false; // TODO make configurable
     }
 
@@ -377,7 +375,7 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
      *            The records that failed to write to DynamoDB
      */
     protected synchronized void emitCloudWatchMetrics(final List<Record> records, final List<Record> failures, final AtomicInteger retryCount) {
-        AmazonCloudWatchAsync cloudwatch = CLOUDWATCH.get();
+        AmazonCloudWatchAsync cloudwatch = this.cloudWatch;
         if (null == cloudwatch) {
             return;
         }
@@ -432,7 +430,7 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
         for (Record record : records) {
             log.error("Could not emit record: " + record);
         }
-        final AmazonCloudWatchAsync cloudwatch = CLOUDWATCH.get();
+        final AmazonCloudWatchAsync cloudwatch = this.cloudWatch;
         if (null != cloudwatch) {
             final double failed = records.size();
             final MetricDatum recordsProcessedFailedDatum = new MetricDatum().withMetricName(RECORDS_FAILED).withValue(failed).withUnit(StandardUnit.Count)
@@ -473,7 +471,7 @@ public class DynamoDBReplicationEmitter implements IEmitter<Record> {
      * @return the dynamodb
      */
     public AmazonDynamoDBAsync getDynamodb() {
-        return DYNAMODB.get();
+        return dynamodDb;
     }
 
     /**
